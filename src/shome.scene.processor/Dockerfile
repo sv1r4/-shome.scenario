@@ -1,3 +1,4 @@
+#vase for visual studio run only
 FROM microsoft/dotnet:2.1.6-aspnetcore-runtime AS base
 WORKDIR /app
 
@@ -15,6 +16,7 @@ RUN dotnet build shome.scene.processor.csproj -c Release -o /app
 FROM build AS publish
 RUN dotnet publish shome.scene.processor.csproj -c Release -o /app
 
+#arm32v7 runtime for rpi
 FROM microsoft/dotnet:2.1.6-aspnetcore-runtime-stretch-slim-arm32v7 AS final
 WORKDIR /app
 COPY --from=publish /app .
