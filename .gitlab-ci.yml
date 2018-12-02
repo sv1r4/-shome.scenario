@@ -7,6 +7,7 @@ variables:
   COMPOSE_HTTP_TIMEOUT: "1200"
   MAJOR_VERSION: 0
   MINOR_VERSION: 0
+  STACK: shome-apps
 
 before_script:  
   - export TAG=$MAJOR_VERSION.$MINOR_VERSION.$CI_PIPELINE_ID-`echo $CI_COMMIT_REF_NAME | sed 's/\//_/g' | tr '[:upper:]' '[:lower:]'`
@@ -31,7 +32,7 @@ deploy:rpi-server:
   script:
     - echo "${IMAGE_PREFIX}<image>:${TAG}"
     - docker login -u $RPI_REGISTRY_USER -p $RPI_REGISTRY_PASSWORD registry.gitlab.com
-    - docker stack deploy --with-registry-auth --compose-file ./docker-compose.deploy.yml shome-util
+    - docker stack deploy --with-registry-auth --compose-file ./docker-compose.deploy.yml $STACK
   only:
     - master
   tags:
