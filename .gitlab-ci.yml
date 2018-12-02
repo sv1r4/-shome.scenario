@@ -1,0 +1,39 @@
+stages: 
+  - build
+  - deploy
+
+variables:  
+  ASPNETCORE_ENVIRONMENT: Production  
+  COMPOSE_HTTP_TIMEOUT: "1200"
+  MAJOR_VERSION: 0
+  MINOR_VERSION: 0
+
+before_script:  
+  - export TAG=$MAJOR_VERSION.$MINOR_VERSION.$CI_PIPELINE_ID-`echo $CI_COMMIT_REF_NAME | sed 's/\//_/g' | tr '[:upper:]' '[:lower:]'`
+  - echo $TAG
+
+    
+build:images:
+  image: tmaier/docker-compose
+  stage: build
+  services:
+    - docker:dind    
+  script:    
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker-compose -f "docker-compose.yml" -f "docker-compose.override.yml" build --force-rm --pull    
+    - docker-compose -f "docker-compose.yml" -f "docker-compose.override.yml" push    
+
+    
+deploy:rpi-server:
+  stage: deploy
+  variables:
+    IMAGE_PREFIX: registry.gitlab.com/sv1r4/shome.scenario/
+  script:
+    - echo "${IMAGE_PREFIX}<image>:${TAG}"
+    - docker login -u $RPI_REGISTRY_USER -p $RPI_REGISTRY_PASSWORD registry.gitlab.com
+    - docker stack deploy --with-registry-auth --compose-file ./docker-compose.deploy.yml shome-util
+  only:
+    - master
+  tags:
+    - rpi-server
+    - shome

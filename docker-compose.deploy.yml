@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  shome-scene-processor:
+    image: "${IMAGE_PREFIX}shome.scene.processor:${TAG}"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        #window: 120s
