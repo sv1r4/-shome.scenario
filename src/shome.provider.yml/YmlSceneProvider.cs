@@ -4,5 +4,6 @@ namespace shome.provider.yml
 {
     public class YmlSceneProvider:ISceneProvider
     {
+
     }
 }
