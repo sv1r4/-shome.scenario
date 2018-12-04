@@ -10,10 +10,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\shome.scene.mqtt\shome.scene.mqtt.csproj" />
     <ProjectReference Include="..\shome.scene.provider.yml\shome.scene.provider.yml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="scenes\test.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
