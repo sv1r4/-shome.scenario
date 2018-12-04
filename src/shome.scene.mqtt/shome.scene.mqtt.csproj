@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
-    <PackageReference Include="M2MqttDotnetCore" Version="1.0.8" />
+    <PackageReference Include="MQTTnet" Version="2.8.4" />
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="2.8.4" />
   </ItemGroup>
 
 </Project>
