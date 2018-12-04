@@ -102,12 +102,16 @@ namespace shome.scene.processor
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("#").WithAtLeastOnceQoS().Build());
             mqttClient.Connected += (sender, args) =>
             {
-                _logger.LogDebug("mqtt connected"); 
+                _logger.LogInformation("mqtt connected"); 
             };
 
             mqttClient.ConnectingFailed += (sender, args) =>
             {
                 _logger.LogError($"mqtt connection fail. Error {args.Exception}");
+            };
+            mqttClient.Disconnected += (sender, args) =>
+            {
+                _logger.LogWarning($"mqtt disconnected. Error {args.Exception}");
             };
             mqttClient.SynchronizingSubscriptionsFailed += (sender, args) =>
             {
