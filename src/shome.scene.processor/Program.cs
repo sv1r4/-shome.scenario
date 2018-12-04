@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using shome.scene.provider.contract;
+using shome.scene.provider.yml;
 
 namespace shome.scene.processor
 {
@@ -11,7 +12,7 @@ namespace shome.scene.processor
         static void Main(string[] args)
         {
             var ss = new ServiceCollection();
-            ss.AddTransient<ISceneProvider, TestSceneProvider>();
+            ss.AddTransient<ISceneProvider, YmlSceneProvider>();
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -23,8 +24,4 @@ namespace shome.scene.processor
         }
     }
 
-    public class TestSceneProvider : ISceneProvider
-    {
-
-    }
 }

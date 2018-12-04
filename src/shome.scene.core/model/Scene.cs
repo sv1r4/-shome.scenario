@@ -5,14 +5,14 @@ namespace shome.scene.core.model
 {
     public class Scene
     {
-        public IReadOnlyList<SceneAction> Actions { get; set; } = Array.Empty<SceneAction>();
+        public IEnumerable<SceneAction> Actions { get; set; } = Array.Empty<SceneAction>();
     }
 
     public class SceneAction
     {
         public string Name { get; set; }
-        public IReadOnlyList<SceneIf> If { get; set; } = Array.Empty<SceneIf>();
-        public IReadOnlyList<SceneThen> Then { get; set; } = Array.Empty<SceneThen>();
+        public IEnumerable<SceneIf> If { get; set; } = Array.Empty<SceneIf>();
+        public IEnumerable<SceneThen> Then { get; set; } = Array.Empty<SceneThen>();
         public string DependsOn { get; set; }
     }
 
@@ -22,6 +22,7 @@ namespace shome.scene.core.model
         public string Value { get; set; }
         public string JsonMember { get; set; }
         public string JsonValue { get; set; }
+        //todo verify?
     }
 
     public class SceneThen
