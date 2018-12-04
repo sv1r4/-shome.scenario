@@ -5,7 +5,7 @@ WORKDIR /app
 FROM microsoft/dotnet:2.2-sdk-alpine AS build
 WORKDIR /src
 COPY src/shome.scene.processor/shome.scene.processor.csproj src/shome.scene.processor/
-COPY src/shome.provider.yml/shome.provider.yml.csproj src/shome.provider.yml/
+COPY src/shome.scene.provider.yml/shome.scene.provider.yml.csproj src/shome.scene.provider.yml/
 COPY src/shome.scene.provider/shome.scene.provider.csproj src/shome.scene.provider/
 COPY src/shome.scene.core/shome.scene.core.csproj src/shome.scene.core/
 RUN dotnet restore src/shome.scene.processor/shome.scene.processor.csproj
