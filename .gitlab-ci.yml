@@ -17,6 +17,8 @@ before_script:
 build:images:
   image: tmaier/docker-compose
   stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   services:
     - docker:dind    
   script:    
