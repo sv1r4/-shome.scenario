@@ -1,4 +1,4 @@
-#vase for visual studio run only
+#base for visual studio run only
 FROM microsoft/dotnet:2.2.0-aspnetcore-runtime AS base
 WORKDIR /app
 
