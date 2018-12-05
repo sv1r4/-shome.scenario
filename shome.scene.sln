@@ -17,7 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.provider.yml.unittest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.provider.yml", "src\shome.scene.provider.yml\shome.scene.provider.yml.csproj", "{D1688F9E-2537-49AE-B863-A00447792CDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.mqtt", "src\shome.scene.mqtt\shome.scene.mqtt.csproj", "{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.mqtt", "src\shome.scene.mqtt\shome.scene.mqtt.csproj", "{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Akka.DI.Microsoft", "src\submodules\akka.di.microsoft\src\Akka.DI.Microsoft\Akka.DI.Microsoft.csproj", "{D0228B21-57E7-41FF-85FE-B4627896597C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,12 +57,17 @@ Global
 		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0228B21-57E7-41FF-85FE-B4627896597C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0228B21-57E7-41FF-85FE-B4627896597C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0228B21-57E7-41FF-85FE-B4627896597C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0228B21-57E7-41FF-85FE-B4627896597C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{37C819DF-1C11-4946-A440-B9D7F1292C9A} = {6A91D9EC-E451-4F12-81D3-9DB9A44136C0}
+		{D0228B21-57E7-41FF-85FE-B4627896597C} = {F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CE743421-FAC4-4D72-8E06-2B715132B457}

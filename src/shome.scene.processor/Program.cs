@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.DI.Core;
+using Akka.DI.Microsoft;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -13,6 +15,7 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using shome.scene.mqtt.config;
 using shome.scene.mqtt.contract;
+using shome.scene.processor.actors;
 using shome.scene.processor.mqtt;
 using shome.scene.provider.contract;
 using shome.scene.provider.yml;
@@ -53,7 +56,7 @@ namespace shome.scene.processor
             }
         }
 
-        private static async Task Stop()
+        public static async Task Stop()
         {
             if (_mqtt != null)
             {
@@ -62,7 +65,7 @@ namespace shome.scene.processor
             _actorSystem?.Dispose();
         }
         
-        private static async Task Start(CancellationToken cancellationToken)
+        public static async Task Start(CancellationToken cancellationToken)
         {
             try
             {
@@ -101,10 +104,13 @@ namespace shome.scene.processor
                 services.AddSingleton<ActorSystem>(_actorSystem);
                 // ReSharper restore RedundantTypeArgumentsOfMethod
                 services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
+                services.AddScoped<ScenesCreatorActor>();
 
                 var sp = services.BuildServiceProvider();
 
                 #endregion
+
+                InitActorSystemDI(_actorSystem, sp);
 
                 _logger = sp.GetService<ILogger<Program>>();
                 _logger.LogInformation("Scene Processor Start");
@@ -119,7 +125,14 @@ namespace shome.scene.processor
 
         private static ActorSystem InitActorSystem()
         {
-            return ActorSystem.Create($"shome-scene-actor-system");
+            return ActorSystem.Create("shome-scene-actor-system");
+        }
+
+        // ReSharper disable once UnusedMethodReturnValue.Local
+        private static IDependencyResolver InitActorSystemDI(ActorSystem actorSystem, IServiceProvider sp)
+        {
+            var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+            return new MicrosoftDependencyResolver(scopeFactory, actorSystem);            
         }
 
         #endregion

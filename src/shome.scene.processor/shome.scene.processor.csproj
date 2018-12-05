@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\shome.scene.mqtt\shome.scene.mqtt.csproj" />
     <ProjectReference Include="..\shome.scene.provider.yml\shome.scene.provider.yml.csproj" />
+    <ProjectReference Include="..\submodules\akka.di.microsoft\src\Akka.DI.Microsoft\Akka.DI.Microsoft.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
@@ -29,9 +30,6 @@
     <None Update="scenes\test.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="actors\" />
   </ItemGroup>
 
 </Project>
