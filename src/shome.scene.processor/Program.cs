@@ -11,6 +11,8 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using shome.scene.mqtt.config;
+using shome.scene.mqtt.contract;
+using shome.scene.processor.mqtt;
 using shome.scene.provider.contract;
 using shome.scene.provider.yml;
 using shome.scene.provider.yml.config;
@@ -20,42 +22,68 @@ namespace shome.scene.processor
     public class Program
     {
         private static ILogger _logger;
+        private static IManagedMqttClient _mqtt;
+        private static IFileProvider _fileProvider;
 
         public static void Main()
         {
-            var cts = new CancellationTokenSource();
-            Console.CancelKeyPress += (sender, args) =>
+            using (var cts = new CancellationTokenSource())
             {
-                Console.WriteLine("App graceful stop");
-                try
+                var token = cts.Token;
+                Console.CancelKeyPress += (sender, args) =>
                 {
-                    Stop().GetAwaiter().GetResult();
-                }
-                finally
-                {
-                    cts.Cancel();
-                }
-            };
-            Console.WriteLine("App start");
+                    Console.WriteLine("App graceful stop");
+                    args.Cancel = true;
+                    try
+                    {
+                        Stop().GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        // ReSharper disable once AccessToDisposedClosure
+                        cts.Cancel();
+                    }
+                };
+                Console.WriteLine("App start");
 
-            Start().Wait(cts.Token);
+                Start(token).GetAwaiter().GetResult();
+                token.WaitHandle.WaitOne();
+            }
         }
 
-        private static Task Stop()
+        private static async Task Stop()
         {
-            return Task.CompletedTask;
-        }
+            if (_mqtt != null)
+            {
+                await _mqtt.StopAsync();
+            }
 
-        private static async Task Start()
+        }
+        
+        private static async Task Start(CancellationToken cancellationToken)
         {
             try
             {
+                #region Configuration
+
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .AddEnvironmentVariables();
                 var config = builder.Build();
-                var cfg = config.GetSection(nameof(SceneYamlConfig)).Get<SceneYamlConfig>();
+                var cfgYaml = config.GetSection(nameof(SceneYamlConfig)).Get<SceneYamlConfig>();
+                var cfgMqtt = config.GetSection(nameof(MqttConfig)).Get<MqttConfig>();
+
+                #endregion
+                
+                #region infrastructure
+
+                _mqtt = await InitMqtt(cfgMqtt);
+                _fileProvider = await InitYamlFileProvider(cfgYaml, cancellationToken);
+
+                #endregion
+
+                #region services
 
                 var services = new ServiceCollection();
                 services.AddLogging(logging =>
@@ -64,16 +92,18 @@ namespace shome.scene.processor
                     logging.AddConsole();
                 });
                 services.AddSingleton<ISceneProvider, YamlSceneProvider>();
-                var fp = new PhysicalFileProvider(cfg.DirectoryAbsolute);
-                services.AddSingleton<IFileProvider>(fp);
+                // ReSharper disable RedundantTypeArgumentsOfMethod
+                services.AddSingleton<IFileProvider>(_fileProvider);
+                services.AddSingleton<IManagedMqttClient>(_mqtt);
+                // ReSharper restore RedundantTypeArgumentsOfMethod
+                services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
 
                 var sp = services.BuildServiceProvider();
+
+                #endregion
+
                 _logger = sp.GetService<ILogger<Program>>();
-
-                await InitMqtt(config);
-
-                _logger.LogInformation("Scene Processor");
-                await InfinitMonitorChanges(fp, "*.yaml");
+                _logger.LogInformation("Scene Processor Start");
             }
             catch (Exception ex)
             {
@@ -81,9 +111,11 @@ namespace shome.scene.processor
             }
         }
 
-        private static async Task InitMqtt(IConfigurationRoot config)
+        #region imfrastructure mqtt
+
+        private static async Task<IManagedMqttClient> InitMqtt(MqttConfig cfg)
         {
-            var cfg = config.GetSection(nameof(MqttConfig)).Get<MqttConfig>();
+            
             var optionBuilder = new MqttClientOptionsBuilder()
                 .WithClientId($"shome.scene.processor-{Guid.NewGuid()}")
                 .WithTcpServer(cfg.Host, cfg.Port);
@@ -99,7 +131,7 @@ namespace shome.scene.processor
                 .Build();
 
             var mqttClient = new MqttFactory().CreateManagedMqttClient();
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("#").WithAtLeastOnceQoS().Build());
+            //await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("#").WithAtLeastOnceQoS().Build());
             mqttClient.Connected += (sender, args) =>
             {
                 _logger.LogInformation("mqtt connected"); 
@@ -124,7 +156,18 @@ namespace shome.scene.processor
             };
 
             await mqttClient.StartAsync(options);
-            //await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("my/topic2").Build());
+            return mqttClient;
+        }
+
+        #endregion
+
+        #region infrastructure yaml 
+
+        private static Task<IFileProvider> InitYamlFileProvider(SceneYamlConfig cfg,CancellationToken cancellationToken)
+        {
+            IFileProvider fp = new PhysicalFileProvider(cfg.DirectoryAbsolute);
+            Task.Run(async () => await InfinitMonitorChanges(fp, "*.yaml"), cancellationToken);
+            return Task.FromResult(fp);
         }
 
         private static async Task InfinitMonitorChanges(IFileProvider fp, string path)
@@ -141,7 +184,10 @@ namespace shome.scene.processor
 
                 _logger.LogDebug("changed");
             }
+            // ReSharper disable once FunctionNeverReturns - expected infinit task
         }
+
+        #endregion
     }
 
 }

@@ -8,6 +8,7 @@ COPY src/shome.scene.processor/shome.scene.processor.csproj src/shome.scene.proc
 COPY src/shome.scene.provider.yml/shome.scene.provider.yml.csproj src/shome.scene.provider.yml/
 COPY src/shome.scene.provider/shome.scene.provider.csproj src/shome.scene.provider/
 COPY src/shome.scene.core/shome.scene.core.csproj src/shome.scene.core/
+COPY src/shome.scene.core/shome.scene.mqtt.csproj src/shome.scene.mqtt/
 RUN dotnet restore src/shome.scene.processor/shome.scene.processor.csproj
 COPY . .
 WORKDIR /src/src/shome.scene.processor

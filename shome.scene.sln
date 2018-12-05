@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.provider.yml.unittest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.provider.yml", "src\shome.scene.provider.yml\shome.scene.provider.yml.csproj", "{D1688F9E-2537-49AE-B863-A00447792CDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.mqtt", "src\shome.scene.mqtt\shome.scene.mqtt.csproj", "{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
