@@ -31,6 +31,7 @@ namespace shome.scene.processor
         private static IManagedMqttClient _mqtt;
         private static IFileProvider _fileProvider;
         private static ActorSystem _actorSystem;
+        private static IActorRef _actorConfigReader;
 
         public static void Main()
         {
@@ -86,7 +87,7 @@ namespace shome.scene.processor
                 #region infrastructure
 
                 _actorSystem = InitActorSystem();
-                _mqtt = await InitMqtt(cfgMqtt);
+                
                 _fileProvider = await InitYamlFileProvider(cfgYaml, cancellationToken);
 
                 #endregion
@@ -99,31 +100,40 @@ namespace shome.scene.processor
                     logging.AddConfiguration(config.GetSection("Logging"));
                     logging.AddConsole();
                 });
+                
                 services.AddSingleton<ISceneProvider, YamlSceneProvider>();
+                
                 // ReSharper disable RedundantTypeArgumentsOfMethod
-                services.AddSingleton<IManagedMqttClient>(_mqtt);
+                services.AddSingleton<IManagedMqttClient>(sp=>
+                {
+                    _mqtt = InitMqtt(cfgMqtt).GetAwaiter().GetResult();
+                    return _mqtt;
+                });
                 services.AddSingleton<ActorSystem>(_actorSystem);
                 services.AddSingleton<IFileProvider>(_fileProvider);
                 services.AddSingleton<Deserializer>(new DeserializerBuilder()
                     .WithNamingConvention(new CamelCaseNamingConvention())
                     .Build());
-
                 // ReSharper restore RedundantTypeArgumentsOfMethod
+
                 services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
                 services.Scan(scan =>
-                    scan.FromAssembliesOf(typeof(ScenesCreatorActor))
+                    scan.FromAssembliesOf(typeof(SceneCreatorActor))
                         .AddClasses(x=>x.AssignableTo<ReceiveActor>())
                         .AsSelf()
                         .WithScopedLifetime());
 
-                
-                var sp = services.BuildServiceProvider();
+                var serviceProvider = services.BuildServiceProvider();
 
                 #endregion
 
-                InitActorSystemDI(_actorSystem, sp);
+                InitActorSystemDI(_actorSystem, serviceProvider);
 
-                _logger = sp.GetService<ILogger<Program>>();
+                //initial read
+                _actorConfigReader = _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>());
+                _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
+
+                _logger = serviceProvider.GetService<ILogger<Program>>();
                 _logger.LogInformation("Scene Processor Start");
             }
             catch (Exception ex)
@@ -152,7 +162,6 @@ namespace shome.scene.processor
 
         private static async Task<IManagedMqttClient> InitMqtt(MqttConfig cfg)
         {
-            
             var optionBuilder = new MqttClientOptionsBuilder()
                 .WithClientId($"shome.scene.processor-{Guid.NewGuid()}")
                 .WithTcpServer(cfg.Host, cfg.Port);
@@ -221,7 +230,7 @@ namespace shome.scene.processor
                 }, tcs);
                 await tcs.Task.ConfigureAwait(false);
 
-                _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>()).Tell(new SceneConfigReaderActor.GetScenesConfig());
+                _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
                 _logger.LogDebug("changed");
             }
             // ReSharper disable once FunctionNeverReturns - expected infinit task

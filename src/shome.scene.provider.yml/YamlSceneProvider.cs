@@ -27,7 +27,11 @@ namespace shome.scene.provider.yml
                 {
                     using (var reader = new StreamReader(stream))
                     {
-                        yield return _deserializer.Deserialize<SceneConfig>(reader);
+                        var sceneConfig = _deserializer.Deserialize<SceneConfig>(reader);
+                        if (sceneConfig != null)
+                        {
+                            yield return sceneConfig;
+                        }
                     }
                 }
             }
