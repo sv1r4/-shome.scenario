@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.core", "src\sho
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.processor", "src\shome.scene.processor\shome.scene.processor.csproj", "{3974954D-CCDE-46FA-8A8A-DC5521DB39E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.provider", "src\shome.scene.provider\shome.scene.provider.csproj", "{C736DDFD-6A22-40B7-9F29-6702708B3FCE}"
-EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{AB91E170-0BF3-4000-95F2-84A6F0F9E64F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6A91D9EC-E451-4F12-81D3-9DB9A44136C0}"
@@ -17,11 +15,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.provider.yml.unittest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.provider.yml", "src\shome.scene.provider.yml\shome.scene.provider.yml.csproj", "{D1688F9E-2537-49AE-B863-A00447792CDE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.mqtt", "src\shome.scene.mqtt\shome.scene.mqtt.csproj", "{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Akka.DI.Microsoft", "src\submodules\akka.di.microsoft\src\Akka.DI.Microsoft\Akka.DI.Microsoft.csproj", "{D0228B21-57E7-41FF-85FE-B4627896597C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.akka", "src\shome.scene.akka\shome.scene.akka.csproj", "{FF228534-1BB1-497A-AF72-D92758832D76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastructure", "infrastructure", "{3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{B1E135FE-E7FE-4E87-8EBC-CA9781897134}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.mqtt.core", "src\shome.scene.mqtt.core\shome.scene.mqtt.core.csproj", "{CB200905-228F-4410-B9A6-E21BD3445C44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.mqtt.mqttnet", "src\shome.scene.mqtt.mqttnet\shome.scene.mqtt.mqttnet.csproj", "{8C05525F-1CBC-4265-804B-C0BC49AA251B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +43,6 @@ Global
 		{3974954D-CCDE-46FA-8A8A-DC5521DB39E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3974954D-CCDE-46FA-8A8A-DC5521DB39E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3974954D-CCDE-46FA-8A8A-DC5521DB39E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C736DDFD-6A22-40B7-9F29-6702708B3FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C736DDFD-6A22-40B7-9F29-6702708B3FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C736DDFD-6A22-40B7-9F29-6702708B3FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C736DDFD-6A22-40B7-9F29-6702708B3FCE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB91E170-0BF3-4000-95F2-84A6F0F9E64F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB91E170-0BF3-4000-95F2-84A6F0F9E64F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB91E170-0BF3-4000-95F2-84A6F0F9E64F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,21 +55,33 @@ Global
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1688F9E-2537-49AE-B863-A00447792CDE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9B561FA5-C011-4784-BC4A-D6D9CF2E3E1B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D0228B21-57E7-41FF-85FE-B4627896597C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D0228B21-57E7-41FF-85FE-B4627896597C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0228B21-57E7-41FF-85FE-B4627896597C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0228B21-57E7-41FF-85FE-B4627896597C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF228534-1BB1-497A-AF72-D92758832D76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF228534-1BB1-497A-AF72-D92758832D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF228534-1BB1-497A-AF72-D92758832D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF228534-1BB1-497A-AF72-D92758832D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB200905-228F-4410-B9A6-E21BD3445C44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB200905-228F-4410-B9A6-E21BD3445C44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB200905-228F-4410-B9A6-E21BD3445C44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB200905-228F-4410-B9A6-E21BD3445C44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{3974954D-CCDE-46FA-8A8A-DC5521DB39E1} = {B1E135FE-E7FE-4E87-8EBC-CA9781897134}
 		{37C819DF-1C11-4946-A440-B9D7F1292C9A} = {6A91D9EC-E451-4F12-81D3-9DB9A44136C0}
+		{D1688F9E-2537-49AE-B863-A00447792CDE} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
 		{D0228B21-57E7-41FF-85FE-B4627896597C} = {F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}
+		{FF228534-1BB1-497A-AF72-D92758832D76} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
+		{8C05525F-1CBC-4265-804B-C0BC49AA251B} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CE743421-FAC4-4D72-8E06-2B715132B457}

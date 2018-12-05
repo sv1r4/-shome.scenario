@@ -11,11 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shome.scene.provider\shome.scene.provider.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="mapping\" />
+    <ProjectReference Include="..\shome.scene.core\shome.scene.core.csproj" />
   </ItemGroup>
 
 </Project>

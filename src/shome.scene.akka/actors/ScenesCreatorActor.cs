@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using shome.scene.core.model;
 
-namespace shome.scene.processor.actors
+namespace shome.scene.akka.actors
 {
     public class ScenesCreatorActor: ReceiveActor
     {

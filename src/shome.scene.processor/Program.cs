@@ -13,11 +13,11 @@ using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using shome.scene.akka.actors;
+using shome.scene.core.contract;
 using shome.scene.mqtt.config;
 using shome.scene.mqtt.contract;
-using shome.scene.processor.actors;
 using shome.scene.processor.mqtt;
-using shome.scene.provider.contract;
 using shome.scene.provider.yml;
 using shome.scene.provider.yml.config;
 using YamlDotNet.Serialization;
@@ -221,7 +221,7 @@ namespace shome.scene.processor
                 }, tcs);
                 await tcs.Task.ConfigureAwait(false);
 
-                _actorSystem.ActorOf(_actorSystem.DI().Props<SceneYamlReaderActor>()).Tell(new SceneYamlReaderActor.ReadFiles{FileProvider = fp});
+                _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>()).Tell(new SceneConfigReaderActor.GetScenesConfig());
                 _logger.LogDebug("changed");
             }
             // ReSharper disable once FunctionNeverReturns - expected infinit task
