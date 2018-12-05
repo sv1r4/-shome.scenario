@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Akka.Actor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -24,6 +25,7 @@ namespace shome.scene.processor
         private static ILogger _logger;
         private static IManagedMqttClient _mqtt;
         private static IFileProvider _fileProvider;
+        private static ActorSystem _actorSystem;
 
         public static void Main()
         {
@@ -57,7 +59,7 @@ namespace shome.scene.processor
             {
                 await _mqtt.StopAsync();
             }
-
+            _actorSystem?.Dispose();
         }
         
         private static async Task Start(CancellationToken cancellationToken)
@@ -78,6 +80,7 @@ namespace shome.scene.processor
                 
                 #region infrastructure
 
+                _actorSystem = InitActorSystem();
                 _mqtt = await InitMqtt(cfgMqtt);
                 _fileProvider = await InitYamlFileProvider(cfgYaml, cancellationToken);
 
@@ -95,6 +98,7 @@ namespace shome.scene.processor
                 // ReSharper disable RedundantTypeArgumentsOfMethod
                 services.AddSingleton<IFileProvider>(_fileProvider);
                 services.AddSingleton<IManagedMqttClient>(_mqtt);
+                services.AddSingleton<ActorSystem>(_actorSystem);
                 // ReSharper restore RedundantTypeArgumentsOfMethod
                 services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
 
@@ -110,6 +114,15 @@ namespace shome.scene.processor
                 Console.WriteLine(ex);
             }
         }
+
+        #region infrastructure akka
+
+        private static ActorSystem InitActorSystem()
+        {
+            return ActorSystem.Create($"shome.scene.actor-system");
+        }
+
+        #endregion
 
         #region imfrastructure mqtt
 

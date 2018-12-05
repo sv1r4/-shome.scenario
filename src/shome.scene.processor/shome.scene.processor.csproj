@@ -6,6 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="config\**" />
+    <EmbeddedResource Remove="config\**" />
+    <None Remove="config\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka" Version="1.3.10" />
+    <PackageReference Include="Akka.DI.Core" Version="1.3.10" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="2.8.4" />
   </ItemGroup>
@@ -23,7 +31,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="config\" />
+    <Folder Include="actors\" />
   </ItemGroup>
 
 </Project>
