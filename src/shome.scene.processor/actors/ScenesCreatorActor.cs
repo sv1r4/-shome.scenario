@@ -1,5 +1,6 @@
 ﻿using Akka.Actor;
 using Microsoft.Extensions.Logging;
+using shome.scene.core.model;
 
 namespace shome.scene.processor.actors
 {
@@ -7,9 +8,9 @@ namespace shome.scene.processor.actors
     {
         public ScenesCreatorActor(ILogger<ScenesCreatorActor> logger)
         {
-            Receive<string>(s =>
+            Receive<SceneConfig>(s =>
             {
-                logger.LogDebug($"dotnetlog {s}"); 
+                logger.LogDebug($"SceneConfig received {s}"); 
             });
         }
     }

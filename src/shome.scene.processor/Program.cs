@@ -20,6 +20,8 @@ using shome.scene.processor.mqtt;
 using shome.scene.provider.contract;
 using shome.scene.provider.yml;
 using shome.scene.provider.yml.config;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace shome.scene.processor
 {
@@ -99,9 +101,13 @@ namespace shome.scene.processor
                 });
                 services.AddSingleton<ISceneProvider, YamlSceneProvider>();
                 // ReSharper disable RedundantTypeArgumentsOfMethod
-                services.AddSingleton<IFileProvider>(_fileProvider);
                 services.AddSingleton<IManagedMqttClient>(_mqtt);
                 services.AddSingleton<ActorSystem>(_actorSystem);
+                services.AddSingleton<IFileProvider>(_fileProvider);
+                services.AddSingleton<Deserializer>(new DeserializerBuilder()
+                    .WithNamingConvention(new CamelCaseNamingConvention())
+                    .Build());
+
                 // ReSharper restore RedundantTypeArgumentsOfMethod
                 services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
                 services.Scan(scan =>
@@ -110,6 +116,7 @@ namespace shome.scene.processor
                         .AsSelf()
                         .WithScopedLifetime());
 
+                
                 var sp = services.BuildServiceProvider();
 
                 #endregion
@@ -214,6 +221,7 @@ namespace shome.scene.processor
                 }, tcs);
                 await tcs.Task.ConfigureAwait(false);
 
+                _actorSystem.ActorOf(_actorSystem.DI().Props<SceneYamlReaderActor>()).Tell(new SceneYamlReaderActor.ReadFiles{FileProvider = fp});
                 _logger.LogDebug("changed");
             }
             // ReSharper disable once FunctionNeverReturns - expected infinit task

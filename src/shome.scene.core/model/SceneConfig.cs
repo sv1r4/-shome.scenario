@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace shome.scene.provider.yml.config
+namespace shome.scene.core.model
 {
     public class SceneConfig
     {

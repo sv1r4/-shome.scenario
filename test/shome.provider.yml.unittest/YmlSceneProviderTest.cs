@@ -1,4 +1,4 @@
-using shome.scene.provider.yml.config;
+using shome.scene.core.model;
 using Xunit;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
@@ -118,6 +118,7 @@ namespace shome.provider.yml.unittest
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
                 .Build();
+            
             var scene = deserializer.Deserialize<SceneConfig>(yaml);
             Assert.NotNull(scene);
             Assert.NotEmpty(scene.Actions);
