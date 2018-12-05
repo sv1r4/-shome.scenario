@@ -150,13 +150,15 @@ namespace shome.scene.processor
                 _logger.LogError($"mqtt sync subscriptions fail. Error {args.Exception}");
             };
 
-            mqttClient.ApplicationMessageReceived += (sender, args) =>
-            {
-                _logger.LogDebug($"message received.\n\ttopic='{args.ApplicationMessage.Topic}'\n\tmessage='{Encoding.UTF8.GetString(args.ApplicationMessage.Payload)}'");
-            };
+            mqttClient.ApplicationMessageReceived +=MqttClientOnApplicationMessageReceived; 
 
             await mqttClient.StartAsync(options);
             return mqttClient;
+        }
+
+        private static void MqttClientOnApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+        {
+            _logger.LogDebug($"message received.\n\ttopic='{e.ApplicationMessage.Topic}'\n\tmessage='{Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}'");
         }
 
         #endregion
