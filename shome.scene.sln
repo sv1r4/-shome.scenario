@@ -29,6 +29,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shome.scene.mqtt.core", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.mqtt.mqttnet", "src\shome.scene.mqtt.mqttnet\shome.scene.mqtt.mqttnet.csproj", "{8C05525F-1CBC-4265-804B-C0BC49AA251B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{3E8A6D1B-9350-4B6A-9EB0-7AFBFDCD4311}"
+	ProjectSection(SolutionItems) = preProject
+		.gitlab-ci.yml = .gitlab-ci.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +82,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3974954D-CCDE-46FA-8A8A-DC5521DB39E1} = {B1E135FE-E7FE-4E87-8EBC-CA9781897134}
+		{AB91E170-0BF3-4000-95F2-84A6F0F9E64F} = {B1E135FE-E7FE-4E87-8EBC-CA9781897134}
 		{37C819DF-1C11-4946-A440-B9D7F1292C9A} = {6A91D9EC-E451-4F12-81D3-9DB9A44136C0}
 		{D1688F9E-2537-49AE-B863-A00447792CDE} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
 		{D0228B21-57E7-41FF-85FE-B4627896597C} = {F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}
