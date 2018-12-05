@@ -119,7 +119,7 @@ namespace shome.scene.processor
 
         private static ActorSystem InitActorSystem()
         {
-            return ActorSystem.Create($"shome.scene.actor-system");
+            return ActorSystem.Create($"shome-scene-actor-system");
         }
 
         #endregion
