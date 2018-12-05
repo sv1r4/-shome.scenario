@@ -13,11 +13,12 @@ COPY src/shome.scene.mqtt.mqttnet/shome.scene.mqtt.mqttnet.csproj src/shome.scen
 RUN dotnet restore src/shome.scene.processor/shome.scene.processor.csproj
 COPY . .
 WORKDIR /src/src/shome.scene.processor
-RUN dotnet build shome.scene.processor.csproj -c Release -o /app && \
- dotnet test /src/test/shome.provider.yml.unittest/shome.provider.yml.unittest.csproj -c Release
+RUN dotnet build shome.scene.processor.csproj -c Release -o /app
+ 
 
 FROM build AS publish
-RUN dotnet publish shome.scene.processor.csproj -c Release -o /app
+RUN dotnet test /src/test/shome.provider.yml.unittest/shome.provider.yml.unittest.csproj -c Release && \
+  dotnet publish shome.scene.processor.csproj -c Release -o /app
 
 #arm32v7 runtime for rpi
 FROM microsoft/dotnet:2.2.0-aspnetcore-runtime-stretch-slim-arm32v7 AS final
