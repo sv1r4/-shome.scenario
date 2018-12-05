@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -104,7 +104,11 @@ namespace shome.scene.processor
                 services.AddSingleton<ActorSystem>(_actorSystem);
                 // ReSharper restore RedundantTypeArgumentsOfMethod
                 services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
-                services.AddScoped<ScenesCreatorActor>();
+                services.Scan(scan =>
+                    scan.FromAssembliesOf(typeof(ScenesCreatorActor))
+                        .AddClasses(x=>x.AssignableTo<ReceiveActor>())
+                        .AsSelf()
+                        .WithScopedLifetime());
 
                 var sp = services.BuildServiceProvider();
 
