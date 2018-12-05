@@ -17,7 +17,6 @@ namespace shome.scene.akka.actors
             _mqtt = mqtt;
             Receive<SceneConfig>(async s =>
             {
-                //subscribe to mqtt
                 await SubscribeToSceneTriggers(s);
             });
         }
