@@ -31,6 +31,7 @@ deploy:rpi-server:
   stage: deploy
   variables:
     IMAGE_PREFIX: registry.gitlab.com/sv1r4/shome.scenario/
+    GIT_SUBMODULE_STRATEGY: none
   script:
     - echo "${IMAGE_PREFIX}<image>:${TAG}"
     - docker login -u $RPI_REGISTRY_USER -p $RPI_REGISTRY_PASSWORD registry.gitlab.com
