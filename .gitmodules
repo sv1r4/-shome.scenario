@@ -1,0 +1,3 @@
+[submodule "src/submodules/akka.di.microsoft"]
+	path = src/submodules/akka.di.microsoft
+	url = git@github.com:MikeBairdRocks/Akka.DI.Microsoft.git
