@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ namespace shome.scene.akka.actors
         {
             _logger = logger;
             _mqtt = mqtt;
-            Receive<SceneConfig>(async s =>
+            ReceiveAsync<SceneConfig>(async s =>
             {
                 await SubscribeToSceneTriggers(s);
             });
@@ -30,16 +31,16 @@ namespace shome.scene.akka.actors
             }
         }
 
-        protected override void PreStart()
-        {
-            base.PreStart();
-            _logger.LogDebug($"{nameof(SceneCreatorActor)} start");
-        }
+        //protected override void PreStart()
+        //{
+        //    base.PreStart();
+        //    _logger.LogDebug($"{nameof(SceneCreatorActor)} start");
+        //}
 
-        protected override void PostStop()
-        {
-            base.PostStop();
-            _logger.LogDebug($"{nameof(SceneCreatorActor)} stop");
-        }
+        //protected override void PostStop()
+        //{
+        //    base.PostStop();
+        //    _logger.LogDebug($"{nameof(SceneCreatorActor)} stop");
+        //}
     }
 }
