@@ -1,33 +1,42 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Akka.Actor;
+using Akka.DI.Core;
 using Microsoft.Extensions.Logging;
 using shome.scene.core.model;
-using shome.scene.mqtt.contract;
 
 namespace shome.scene.akka.actors
 {
     public class SceneCreatorActor: ReceiveActor
     {
         private readonly ILogger _logger;
-        private readonly IMqttBasicClient _mqtt;
-        public SceneCreatorActor(ILogger<SceneCreatorActor> logger, IMqttBasicClient mqtt)
+        private readonly KnownPaths _knownPaths;
+        public SceneCreatorActor(ILogger<SceneCreatorActor> logger, KnownPaths knownPaths)
         {
             _logger = logger;
-            _mqtt = mqtt;
-            ReceiveAsync<SceneConfig>(async s =>
+            _knownPaths = knownPaths;
+            Receive<CreateScene>(e =>
             {
-                await SubscribeToSceneTriggers(s);
+                SubscribeToSceneTriggers(e.SceneConfig);
             });
         }
 
-        private async Task SubscribeToSceneTriggers(SceneConfig sceneConfig)
+        private void SubscribeToSceneTriggers(SceneConfig sceneConfig)
         {
+            //create scene actor
+            //todo remove old actors
+            //Context.GetChildren().Select(x=>x.)
+            var sceneActor = Context.ActorOf(Context.DI().Props<SceneActor>());
+
             foreach (var topic in sceneConfig.Actions.SelectMany(x => x.If).Select(x => x.Topic))
             {
-                _logger.LogDebug($"Subscribe topic='{topic}'");
-                await _mqtt.Subscribe(topic);
+                _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
+                
+                //subscribe scene actor for messages
+                Context.System.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.Sub
+                {
+                    Topic = topic,
+                    Subscriber = sceneActor
+                });
             }
         }
 
@@ -42,5 +51,10 @@ namespace shome.scene.akka.actors
         //    base.PostStop();
         //    _logger.LogDebug($"{nameof(SceneCreatorActor)} stop");
         //}
+
+        public class CreateScene
+        {
+            public  SceneConfig SceneConfig { get; set; }
+        }
     }
 }

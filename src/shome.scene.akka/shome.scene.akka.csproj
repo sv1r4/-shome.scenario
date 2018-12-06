@@ -17,4 +17,8 @@
     <ProjectReference Include="..\submodules\akka.di.microsoft\src\Akka.DI.Microsoft\Akka.DI.Microsoft.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="messages\" />
+  </ItemGroup>
+
 </Project>

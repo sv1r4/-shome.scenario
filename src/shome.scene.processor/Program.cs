@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using shome.scene.akka;
 using shome.scene.akka.actors;
 using shome.scene.core.contract;
 using shome.scene.mqtt.config;
@@ -32,6 +33,8 @@ namespace shome.scene.processor
         private static IFileProvider _fileProvider;
         private static ActorSystem _actorSystem;
         private static IActorRef _actorConfigReader;
+        private static IActorRef _actorPubSub;
+        private static KnownPaths _knownPaths;
 
         public static void Main()
         {
@@ -109,6 +112,7 @@ namespace shome.scene.processor
                     _mqtt = InitMqtt(cfgMqtt).GetAwaiter().GetResult();
                     return _mqtt;
                 });
+                
                 services.AddSingleton<ActorSystem>(_actorSystem);
                 services.AddSingleton<IFileProvider>(_fileProvider);
                 services.AddSingleton<Deserializer>(new DeserializerBuilder()
@@ -122,6 +126,7 @@ namespace shome.scene.processor
                         .AddClasses(x=>x.AssignableTo<ReceiveActor>())
                         .AsSelf()
                         .WithScopedLifetime());
+                services.AddSingleton(new KnownPaths());
 
                 var serviceProvider = services.BuildServiceProvider();
 
@@ -130,8 +135,12 @@ namespace shome.scene.processor
                 InitActorSystemDI(_actorSystem, serviceProvider);
 
                 //initial read
+
                 _actorConfigReader = _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>());
+                _actorPubSub = _actorSystem.ActorOf(_actorSystem.DI().Props<PubSubActor>());
                 _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
+                _knownPaths = serviceProvider.GetRequiredService<KnownPaths>();
+                _knownPaths.PubSubActorPath = _actorPubSub.Path;
 
                 _logger = serviceProvider.GetService<ILogger<Program>>();
                 _logger.LogInformation("Scene Processor Start");
@@ -204,7 +213,13 @@ namespace shome.scene.processor
 
         private static void MqttClientOnApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
         {
-            _logger.LogDebug($"message received.\n\ttopic='{e.ApplicationMessage.Topic}'\n\tmessage='{Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}'");
+            var strMessage = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            _logger.LogDebug($"message received.\n\ttopic='{e.ApplicationMessage.Topic}'\n\tmessage='{strMessage}'");
+            _actorSystem.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.MqttReceivedMessage
+            {
+                Topic = e.ApplicationMessage.Topic,
+                Message = strMessage
+            });
         }
 
         #endregion
