@@ -1,4 +1,5 @@
-﻿actions:
+﻿name: "testscene"
+actions:
   - name: TestScene
     if:
     - topic: bath/switch/e/state

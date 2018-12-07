@@ -27,12 +27,24 @@ namespace shome.scene.akka.actors
 
                 _logger.LogDebug($"Sub received. Subscribers count = {_subscribers.Count}");
             });
+            Receive<UnSub>(e =>
+            {
+                if (_subscribers.Contains(e.Subscriber))
+                {
+                    _subscribers.Remove(e.Subscriber);
+                }
+
+                _logger.LogDebug($"UnSub received. Subscribers count = {_subscribers.Count}");
+            });
             Receive<MqttReceivedMessage>(e =>
             {
+                var i = 0;
                 foreach (var subscriber in _subscribers.Where(x=>!x.IsNobody()))
                 {
+                    i++;
                     subscriber.Tell(e);
                 }
+                _logger.LogDebug($"MqttMessage delivered to {i} actors");
             });
         }
 
@@ -46,6 +58,11 @@ namespace shome.scene.akka.actors
         {
             public IActorRef Subscriber;
             public string Topic { get; set; }
+        }
+
+        public class UnSub
+        {
+            public IActorRef Subscriber;
         }
     }
 

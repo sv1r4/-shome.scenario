@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Akka.Actor;
 using Akka.DI.Core;
 using Microsoft.Extensions.Logging;
@@ -22,11 +23,13 @@ namespace shome.scene.akka.actors
 
         private void SubscribeToSceneTriggers(SceneConfig sceneConfig)
         {
-            //create scene actor
-            //todo remove old actors
-            //Context.GetChildren().Select(x=>x.)
-            var sceneActor = Context.ActorOf(Context.DI().Props<SceneActor>());
-
+            //stop prev version if exists
+            var old = Context.System.ActorSelection($"/user/$a/$a/{sceneConfig.Name}-*");
+            old.Tell(PoisonPill.Instance);
+            //start new
+            //todo pass config to scene actor
+            var sceneActor = Context.ActorOf(Context.DI().Props<SceneActor>(), $"{sceneConfig.Name}-{Guid.NewGuid()}");
+            
             foreach (var topic in sceneConfig.Actions.SelectMany(x => x.If).Select(x => x.Topic))
             {
                 _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
@@ -39,18 +42,6 @@ namespace shome.scene.akka.actors
                 });
             }
         }
-
-        //protected override void PreStart()
-        //{
-        //    base.PreStart();
-        //    _logger.LogDebug($"{nameof(SceneCreatorActor)} start");
-        //}
-
-        //protected override void PostStop()
-        //{
-        //    base.PostStop();
-        //    _logger.LogDebug($"{nameof(SceneCreatorActor)} stop");
-        //}
 
         public class CreateScene
         {

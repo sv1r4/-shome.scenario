@@ -67,6 +67,7 @@ namespace shome.provider.yml.unittest
         }
 
         [InlineData(@"
+  name: test1
   actions:
   - name: LightOn
     if:
@@ -83,6 +84,7 @@ namespace shome.provider.yml.unittest
       message: 1
 ")]
         [InlineData(@"
+  name: test2
   actions:
   - name: LightOn
     if:

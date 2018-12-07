@@ -5,6 +5,7 @@ namespace shome.scene.core.model
 {
     public class SceneConfig
     {
+        public string Name { get; set; }
         public IEnumerable<SceneAction> Actions { get; set; } = Array.Empty<SceneAction>();
 
         public class SceneAction
