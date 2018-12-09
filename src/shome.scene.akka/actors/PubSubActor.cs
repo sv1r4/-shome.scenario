@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using Microsoft.Extensions.Logging;
@@ -9,40 +10,52 @@ namespace shome.scene.akka.actors
     public class PubSubActor:ReceiveActor
     {
         private readonly IMqttBasicClient _mqttClient;
-        private readonly IList<IActorRef> _subscribers;
+        private readonly IList<SubscriptionBase> _subs;
         private readonly ILogger _logger;
 
         public PubSubActor(IMqttBasicClient mqttClient, ILogger<PubSubActor> logger)
         {
             _mqttClient = mqttClient;
             _logger = logger;
-            _subscribers = new List<IActorRef>();
-            ReceiveAsync<Sub>(async e =>
+            _subs = new List<SubscriptionBase>();
+            ReceiveAsync<SubscriptionBase>(async e =>
             {
-                await _mqttClient.Subscribe(e.Topic);
-                if (!_subscribers.Contains(e.Subscriber))
+                if (!_subs.Contains(e))
                 {
-                    _subscribers.Add(e.Subscriber);
+                    _subs.Add(e);
                 }
 
-                _logger.LogDebug($"Sub received. Subscribers count = {_subscribers.Count}");
+                switch (e.Type)
+                {
+                    case SubscriptionType.Mqtt:
+                        await _mqttClient.Subscribe(((SubscriptionMqtt) e).Topic);
+                        break;
+                    case SubscriptionType.Action:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                _logger.LogDebug($"Sub received. Type='{e.Type.ToString()}'. Subscribers count = {_subs.Count}");
             });
             Receive<UnSub>(e =>
             {
-                if (_subscribers.Contains(e.Subscriber))
+                var sub = _subs.FirstOrDefault(x => x.Subscriber.Equals(e.Actor));
+                if (sub != null)
                 {
-                    _subscribers.Remove(e.Subscriber);
+                    _subs.Remove(sub);
                 }
 
-                _logger.LogDebug($"UnSub received. Subscribers count = {_subscribers.Count}");
+                _logger.LogDebug($"UnSub received. Subscribers count = {_subs.Count}");
             });
             Receive<MqttReceivedMessage>(e =>
             {
                 var i = 0;
-                foreach (var subscriber in _subscribers.Where(x=>!x.IsNobody()))
+                foreach (var sub in _subs.Where(x=>x.Type==SubscriptionType.Mqtt 
+                                                          //todo mach topic 
+                                                          && !x.Subscriber.IsNobody()))
                 {
                     i++;
-                    subscriber.Tell(e);
+                    sub.Subscriber.Tell(e);
                 }
                 _logger.LogDebug($"MqttMessage delivered to {i} actors");
             });
@@ -54,15 +67,51 @@ namespace shome.scene.akka.actors
             public string Message { get; set; }
         }
 
-        public class Sub
-        {
-            public IActorRef Subscriber;
-            public string Topic { get; set; }
-        }
+        
 
         public class UnSub
         {
-            public IActorRef Subscriber;
+            public IActorRef Actor;
+        }
+
+        public abstract class SubscriptionBase
+        {
+            protected SubscriptionBase(SubscriptionType type)
+            {
+                Type = type;
+            }
+            public SubscriptionType Type { get;}
+            public IActorRef Subscriber { get; set; }
+        }
+
+        public class SubscriptionMqtt:SubscriptionBase
+        {
+            
+            public string Topic { get; set; }
+
+            public SubscriptionMqtt() : base(SubscriptionType.Mqtt)
+            {
+            }
+        }
+
+        public class SubscriptionAction : SubscriptionBase
+        {
+            public string ActionName { get; set; }
+            public SubscriptionAction() : base(SubscriptionType.Action)
+            {
+            }
+        }
+
+        public enum ActionResult
+        {
+            Success,
+            Fail
+        }
+
+        public enum SubscriptionType
+        {
+            Mqtt,
+            Action
         }
     }
 
