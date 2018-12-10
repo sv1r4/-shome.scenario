@@ -10,7 +10,7 @@ namespace shome.scene.provider.yml.config
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.Directory))
+                if (string.IsNullOrWhiteSpace(Directory))
                 {
                     return Directory;
                 }

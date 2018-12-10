@@ -20,18 +20,19 @@ namespace shome.provider.yml.unittest
         {
             var scene = new SceneConfig
             {
+                Name = "scene",
                 Actions = new[]
                 {
                     new SceneConfig.SceneAction
                     {
                         Name = "LightOn",
-                        If = new[]
+                        If = new []
                         {
                             new SceneConfig.SceneIf
                             {
                                 Topic = "bath/switch/e/state",
                                 Value = "1"
-                            }
+                            },
                         },
                         Then = new[]
                         {
@@ -55,63 +56,66 @@ namespace shome.provider.yml.unittest
                                 Topic = "bath/sound/c/power",
                                 Message = "1"
                             }
+                        },
+                        DependsOn = new []
+                        {
+                            new SceneConfig.SceneDependency
+                            {
+                                Name = "testaction",
+                                Result = ActionResult.Success
+                            }
                         }
                     }
                 }
             };
 
 
-            var serializer = new SerializerBuilder().Build();
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
             var yaml = serializer.Serialize(scene);
             _output.WriteLine(yaml);
         }
 
         [InlineData(@"
-  name: test1
-  actions:
-  - name: LightOn
-    if:
-    - topic: bath/switch/e/state
-      value: 1
-    then:
-    - topic: bath/light/0/c/state
-      message: 1
-    - topic: bath/light/1/c/state
-      message: 1
-    - topic: bath/mirror/lcd/c/state
-      message: 1
-    - topic: bath/sound/c/power
-      message: 1
+name: scene
+actions:
+- name: LightOn
+  if:
+  - topic: bath/switch/e/state
+    value: 1
+  then:
+  - topic: bath/light/0/c/state
+    message: 1
+  - topic: bath/light/1/c/state
+    message: 1
+  - topic: bath/mirror/lcd/c/state
+    message: 1
+  - topic: bath/sound/c/power
+    message: 1
+  dependsOn:
+  - name: testaction
+    result: Success
 ")]
         [InlineData(@"
-  name: test2
-  actions:
-  - name: LightOn
-    if:
-    - topic: bath/switch/e/state
-      value: 1
-    then:
-    - topic: bath/light/0/c/state
-      message: 1
-    - topic: bath/light/1/c/state
-      message: 1
-    - topic: bath/mirror/lcd/c/state
-      message: 1
-    - topic: bath/sound/c/power
-      message: 1
-  - name: LightOff
-    if:
-    - topic: bath/switch/e/state
-      value: 0
-    then:
-    - topic: bath/light/0/c/state
-      message: 0
-    - topic: bath/light/1/c/state
-      message: 0
-    - topic: bath/mirror/lcd/c/state
-      message: 0
-    - topic: bath/sound/c/power
-      message: 0
+name: scene
+actions:
+- name: LightOn
+  if:
+  - topic: bath/switch/e/state
+    value: 1
+  then:
+  - topic: bath/light/0/c/state
+    message: 1
+  - topic: bath/light/1/c/state
+    message: 1
+  - topic: bath/mirror/lcd/c/state
+    message: 1
+  - topic: bath/sound/c/power
+    message: 1
+  dependsOn:
+  - name: testaction
+    result: fail
 ")]
         [Theory]
         public void YamlDeserialization(string yaml)
@@ -126,4 +130,5 @@ namespace shome.provider.yml.unittest
             Assert.NotEmpty(scene.Actions);
         }
     }
+
 }

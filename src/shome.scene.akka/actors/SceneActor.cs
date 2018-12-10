@@ -22,17 +22,68 @@ namespace shome.scene.akka.actors
 
             Receive<Init>(e =>
             {
-                foreach (var topic in e.Config.Actions.SelectMany(x => x.If).Select(x => x.Topic))
+                foreach (var sceneIf in e.Config.Actions.SelectMany(x => x.If))
                 {
-                    _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
+                    // _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
                     //subscribe scene actor for messages
-                    Context.System.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.SubscriptionMqtt
-                    {
-                        Topic = topic,
-                        Subscriber = Self
-                    });
+                    Context.System.ActorSelection(_knownPaths.PubSubActorPath)
+                        .Tell(new SubscriptionBuilder()
+                            .FromSceneIf(sceneIf)
+                            .WithActor(Self)
+                            .Build());
+                }
+                foreach (var dependency in e.Config.Actions.SelectMany(x => x.DependsOn))
+                {
+                    // _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
+                    //subscribe scene actor for messages
+                    Context.System.ActorSelection(_knownPaths.PubSubActorPath)
+                        .Tell(new SubscriptionBuilder()
+                            .FromDependency(dependency)
+                            .WithActor(Self)
+                            .Build());
                 }
             });
+        }
+
+        public class SubscriptionBuilder
+        {
+            private IActorRef _actor;
+            private PubSubActor.SubscriptionBase _subscription;
+
+            public SubscriptionBuilder WithActor(IActorRef actor)
+            {
+                _actor = actor;
+                return this;
+            }
+            public SubscriptionBuilder FromSceneIf(SceneConfig.SceneIf sceneIf)
+            {
+              
+                _subscription = new PubSubActor.SubscriptionMqtt
+                {
+                    Topic = sceneIf.Topic
+                };
+            
+                return this;
+            }
+
+            public SubscriptionBuilder FromDependency(SceneConfig.SceneDependency sceneDependency)
+            {
+                _subscription = new PubSubActor.SubscriptionAction
+                {
+                    ActionName = sceneDependency.Name
+                };
+                return this;
+            }
+
+            public PubSubActor.SubscriptionBase Build()
+            {
+                if (_subscription == null)
+                {
+                    return null;
+                }
+                _subscription.Subscriber = _actor;
+                return _subscription;
+            }
         }
 
         protected override void PreStart()
@@ -51,11 +102,6 @@ namespace shome.scene.akka.actors
         public class Init
         {
             public SceneConfig Config { get; set; }
-        }
-
-        public class Trigger
-        {
-
         }
     }
 

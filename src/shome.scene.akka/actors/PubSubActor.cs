@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using Microsoft.Extensions.Logging;
+using shome.scene.core.model;
 using shome.scene.mqtt.contract;
 
 namespace shome.scene.akka.actors
@@ -27,10 +28,10 @@ namespace shome.scene.akka.actors
 
                 switch (e.Type)
                 {
-                    case SubscriptionType.Mqtt:
+                    case TriggerType.Mqtt:
                         await _mqttClient.Subscribe(((SubscriptionMqtt) e).Topic);
                         break;
-                    case SubscriptionType.Action:
+                    case TriggerType.Action:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -50,7 +51,7 @@ namespace shome.scene.akka.actors
             Receive<MqttReceivedMessage>(e =>
             {
                 var i = 0;
-                foreach (var sub in _subs.Where(x=>x.Type==SubscriptionType.Mqtt 
+                foreach (var sub in _subs.Where(x=>x.Type==TriggerType.Mqtt 
                                                           //todo mach topic 
                                                           && !x.Subscriber.IsNobody()))
                 {
@@ -76,11 +77,11 @@ namespace shome.scene.akka.actors
 
         public abstract class SubscriptionBase
         {
-            protected SubscriptionBase(SubscriptionType type)
+            protected SubscriptionBase(TriggerType type)
             {
                 Type = type;
             }
-            public SubscriptionType Type { get;}
+            public TriggerType Type { get;}
             public IActorRef Subscriber { get; set; }
         }
 
@@ -89,7 +90,7 @@ namespace shome.scene.akka.actors
             
             public string Topic { get; set; }
 
-            public SubscriptionMqtt() : base(SubscriptionType.Mqtt)
+            public SubscriptionMqtt() : base(TriggerType.Mqtt)
             {
             }
         }
@@ -97,22 +98,14 @@ namespace shome.scene.akka.actors
         public class SubscriptionAction : SubscriptionBase
         {
             public string ActionName { get; set; }
-            public SubscriptionAction() : base(SubscriptionType.Action)
+
+            public SubscriptionAction() : base(TriggerType.Action)
             {
             }
         }
 
-        public enum ActionResult
-        {
-            Success,
-            Fail
-        }
 
-        public enum SubscriptionType
-        {
-            Mqtt,
-            Action
-        }
+       
     }
 
     
