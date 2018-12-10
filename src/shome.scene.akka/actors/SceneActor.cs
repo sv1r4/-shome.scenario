@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Akka.Actor;
+using Akka.Event;
 using Microsoft.Extensions.Logging;
 using shome.scene.akka.util;
 using shome.scene.core.model;
@@ -15,6 +16,7 @@ namespace shome.scene.akka.actors
         {
             _logger = logger;
             _knownPaths = knownPaths;
+            
 
             Receive<PubSubActor.MqttReceivedMessage>(e =>
             {
