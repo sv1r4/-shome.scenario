@@ -1,11 +1,12 @@
 ﻿using System.Linq;
 using Akka.Actor;
 using Microsoft.Extensions.Logging;
+using shome.scene.akka.util;
 using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
 {
-    public class SceneActor:ReceiveActor //todo FSM actor
+    public class SceneActor:ReceiveActor //todo FSM actor?
     {
         private readonly ILogger _logger;
         private readonly KnownPaths _knownPaths;
@@ -45,46 +46,7 @@ namespace shome.scene.akka.actors
             });
         }
 
-        public class SubscriptionBuilder
-        {
-            private IActorRef _actor;
-            private PubSubActor.SubscriptionBase _subscription;
-
-            public SubscriptionBuilder WithActor(IActorRef actor)
-            {
-                _actor = actor;
-                return this;
-            }
-            public SubscriptionBuilder FromSceneIf(SceneConfig.SceneIf sceneIf)
-            {
-              
-                _subscription = new PubSubActor.SubscriptionMqtt
-                {
-                    Topic = sceneIf.Topic
-                };
-            
-                return this;
-            }
-
-            public SubscriptionBuilder FromDependency(SceneConfig.SceneDependency sceneDependency)
-            {
-                _subscription = new PubSubActor.SubscriptionAction
-                {
-                    ActionName = sceneDependency.Name
-                };
-                return this;
-            }
-
-            public PubSubActor.SubscriptionBase Build()
-            {
-                if (_subscription == null)
-                {
-                    return null;
-                }
-                _subscription.Subscriber = _actor;
-                return _subscription;
-            }
-        }
+       
 
         protected override void PreStart()
         {

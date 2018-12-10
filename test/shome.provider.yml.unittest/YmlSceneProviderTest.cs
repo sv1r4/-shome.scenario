@@ -62,7 +62,7 @@ namespace shome.provider.yml.unittest
                             new SceneConfig.SceneDependency
                             {
                                 Name = "testaction",
-                                Result = ActionResult.Success
+                                When = ActionResult.Success
                             }
                         }
                     }
@@ -95,27 +95,7 @@ actions:
     message: 1
   dependsOn:
   - name: testaction
-    result: Success
-")]
-        [InlineData(@"
-name: scene
-actions:
-- name: LightOn
-  if:
-  - topic: bath/switch/e/state
-    value: 1
-  then:
-  - topic: bath/light/0/c/state
-    message: 1
-  - topic: bath/light/1/c/state
-    message: 1
-  - topic: bath/mirror/lcd/c/state
-    message: 1
-  - topic: bath/sound/c/power
-    message: 1
-  dependsOn:
-  - name: testaction
-    result: fail
+    when: Success
 ")]
         [Theory]
         public void YamlDeserialization(string yaml)

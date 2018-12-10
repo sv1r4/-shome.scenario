@@ -1,17 +1,18 @@
-﻿Actions:
-- Name: LightOn
-  If:
-  - Topic: bath/switch/e/state
-    Value: 1
-  - Name: testaction
-    Result: Success
-    Type: Action
-  Then:
-  - Topic: bath/light/0/c/state
-    Message: 1
-  - Topic: bath/light/1/c/state
-    Message: 1
-  - Topic: bath/mirror/lcd/c/state
-    Message: 1
-  - Topic: bath/sound/c/power
-    Message: 1
+﻿name: scene
+actions:
+- name: LightOn
+  if:
+  - topic: bath/switch/e/state
+    value: 1
+  then:
+  - topic: bath/light/0/c/state
+    message: 1
+  - topic: bath/light/1/c/state
+    message: 1
+  - topic: bath/mirror/lcd/c/state
+    message: 1
+  - topic: bath/sound/c/power
+    message: 1
+  dependsOn:
+  - name: testaction
+    when: success
