@@ -49,7 +49,7 @@ namespace shome.scene.akka.actors
         protected override void PostStop()
         {
             Context.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.UnSub { Actor = Self });
-            _logger.Debug($"SceneActor - '{this.Self.Path.Name}' shutdown");
+            _logger.Debug($"ActionActor - '{this.Self.Path.Name}' shutdown");
             base.PostStop();
         }
 

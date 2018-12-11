@@ -40,8 +40,8 @@ namespace shome.scene.akka.actors
             });
             Receive<UnSub>(e =>
             {
-                var sub = _subs.FirstOrDefault(x => x.Subscriber.Equals(e.Actor));
-                if (sub != null)
+                var subs = _subs.Where(x => x.Subscriber.Equals(e.Actor)).ToList();
+                foreach (var sub in subs)
                 {
                     _subs.Remove(sub);
                 }
