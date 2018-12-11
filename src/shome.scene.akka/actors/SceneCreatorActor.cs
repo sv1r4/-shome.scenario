@@ -10,14 +10,17 @@ namespace shome.scene.akka.actors
     public class SceneCreatorActor: ReceiveActor
     {
         private readonly ILogger _logger;
-        public SceneCreatorActor(ILogger<SceneCreatorActor> logger)
+        private readonly KnownPaths _knownPaths;
+        public SceneCreatorActor(ILogger<SceneCreatorActor> logger, KnownPaths knownPaths)
         {
             _logger = logger;
+            _knownPaths = knownPaths;
             Receive<CreateScene>(e =>
             {
                 SubscribeToSceneTriggers(e.SceneConfig);
             });
         }
+
 
         private void SubscribeToSceneTriggers(SceneConfig sceneConfig)
         {
@@ -26,17 +29,14 @@ namespace shome.scene.akka.actors
             old.Tell(PoisonPill.Instance);
 
             //start new
-            //todo pass config to scene actor
-            var sceneActor = Context.ActorOf(Context.DI().Props<SceneActor>(), $"{sceneConfig.Name}-{Guid.NewGuid()}");
-            sceneActor.Tell(new SceneActor.Init
-            {
-                Config =  sceneConfig
-            });
+            Context.ActorOf(SceneActor.Props(sceneConfig, _knownPaths), $"{sceneConfig.Name}-{Guid.NewGuid()}");
         }
 
         public class CreateScene
         {
             public  SceneConfig SceneConfig { get; set; }
         }
+
+
     }
 }
