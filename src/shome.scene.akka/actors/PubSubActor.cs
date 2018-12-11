@@ -50,15 +50,24 @@ namespace shome.scene.akka.actors
             Receive<MqttReceivedMessage>(e =>
             {
                 var i = 0;
-                foreach (var sub in _subs.Where(x=>x.Type==TriggerType.Mqtt 
-                                                          //todo mach topic 
-                                                          && !x.Subscriber.IsNobody()))
+                foreach (var sub in _subs
+                    .Where(x => x.Type == TriggerType.Mqtt
+                                //todo mach topic wildcards
+                                && x is SubscriptionMqtt mx
+                                && e.Topic.Equals(mx.Topic, StringComparison.InvariantCultureIgnoreCase)
+                                && !x.Subscriber.IsNobody()))
                 {
                     i++;
-                    sub.Subscriber.Tell(e);
+                    sub.Subscriber.Tell(new ActionActor.TriggerMqtt
+                    {
+                        Topic = e.Topic,
+                        Message = e.Message
+                    });
                 }
+
                 _logger.Debug($"MqttMessage delivered to {i} actors");
             });
+            //todo receive action finish event
         }
 
         public class MqttReceivedMessage
