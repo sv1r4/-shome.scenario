@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
-using Microsoft.Extensions.Logging;
+using Akka.Event;
 using shome.scene.core.model;
 using shome.scene.mqtt.contract;
 
@@ -12,12 +12,11 @@ namespace shome.scene.akka.actors
     {
         private readonly IMqttBasicClient _mqttClient;
         private readonly IList<SubscriptionBase> _subs;
-        private readonly ILogger _logger;
+        private readonly ILoggingAdapter _logger = Context.GetLogger();
 
-        public PubSubActor(IMqttBasicClient mqttClient, ILogger<PubSubActor> logger)
+        public PubSubActor(IMqttBasicClient mqttClient)
         {
             _mqttClient = mqttClient;
-            _logger = logger;
             _subs = new List<SubscriptionBase>();
             ReceiveAsync<SubscriptionBase>(async e =>
             {
@@ -36,7 +35,7 @@ namespace shome.scene.akka.actors
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                _logger.LogDebug($"Sub received. Type='{e.Type.ToString()}'. Subscribers count = {_subs.Count}");
+                _logger.Debug($"Sub received. Type='{e.Type.ToString()}'. Subscribers count = {_subs.Count}");
             });
             Receive<UnSub>(e =>
             {
@@ -46,7 +45,7 @@ namespace shome.scene.akka.actors
                     _subs.Remove(sub);
                 }
 
-                _logger.LogDebug($"UnSub received. Subscribers count = {_subs.Count}");
+                _logger.Debug($"UnSub received. Subscribers count = {_subs.Count}");
             });
             Receive<MqttReceivedMessage>(e =>
             {
@@ -58,7 +57,7 @@ namespace shome.scene.akka.actors
                     i++;
                     sub.Subscriber.Tell(e);
                 }
-                _logger.LogDebug($"MqttMessage delivered to {i} actors");
+                _logger.Debug($"MqttMessage delivered to {i} actors");
             });
         }
 

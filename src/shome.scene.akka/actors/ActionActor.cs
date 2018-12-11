@@ -1,7 +1,5 @@
 ﻿using Akka.Actor;
-using Akka.DI.Core;
 using Akka.Event;
-using Microsoft.Extensions.Logging;
 using shome.scene.akka.util;
 using shome.scene.core.model;
 
@@ -49,7 +47,7 @@ namespace shome.scene.akka.actors
         protected override void PostStop()
         {
             Context.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.UnSub { Actor = Self });
-            _logger.Debug($"ActionActor - '{this.Self.Path.Name}' shutdown");
+            _logger.Debug($"ActionActor - '{Self.Path.Name}' shutdown");
             base.PostStop();
         }
 
