@@ -28,8 +28,9 @@ namespace shome.scene.akka.actors
             var old = Context.System.ActorSelection($"/user/$a/$a/{sceneConfig.Name}-*");
             old.Tell(PoisonPill.Instance);
 
+            var salt = DateTime.Now.Ticks.ToString();
             //start new
-            Context.ActorOf(SceneActor.Props(sceneConfig, _knownPaths), $"{sceneConfig.Name}-{Guid.NewGuid()}");
+            Context.ActorOf(SceneActor.Props(sceneConfig, _knownPaths), $"{sceneConfig.Name}-{salt}");
         }
 
         public class CreateScene

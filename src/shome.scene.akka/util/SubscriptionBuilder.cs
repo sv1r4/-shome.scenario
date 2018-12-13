@@ -7,7 +7,7 @@ namespace shome.scene.akka.util
     public class SubscriptionBuilder
     {
         private IActorRef _actor;
-        private PubSubActor.SubscriptionBase _subscription;
+        private PubSubActor.SubBase _subscription;
 
         public SubscriptionBuilder WithActor(IActorRef actor)
         {
@@ -17,7 +17,7 @@ namespace shome.scene.akka.util
         public SubscriptionBuilder FromSceneIf(SceneConfig.SceneIf sceneIf)
         {
 
-            _subscription = new PubSubActor.SubscriptionMqtt
+            _subscription = new PubSubActor.SubMqtt
             {
                 Topic = sceneIf.Topic
             };
@@ -27,14 +27,14 @@ namespace shome.scene.akka.util
 
         public SubscriptionBuilder FromDependency(SceneConfig.SceneDependency sceneDependency)
         {
-            _subscription = new PubSubActor.SubscriptionAction
+            _subscription = new PubSubActor.SubAction
             {
-                ActionName = sceneDependency.Name
+                ActionName = sceneDependency.Action
             };
             return this;
         }
 
-        public PubSubActor.SubscriptionBase Build()
+        public PubSubActor.SubBase Build()
         {
             if (_subscription == null)
             {

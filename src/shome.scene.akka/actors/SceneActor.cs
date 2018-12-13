@@ -17,9 +17,10 @@ namespace shome.scene.akka.actors
                 _logger.Debug($"todo handle message {e.Topic}@{e.Message}");
             });
 
+            var salt = DateTime.Now.Ticks.ToString();
             foreach (var sceneAction in sceneConfig.Actions)
             {
-                Context.ActorOf(ActionActor.Props(sceneAction, knownPaths), $"{sceneAction.Name}-{Guid.NewGuid()}");
+                Context.ActorOf(ActionActor.Props(sceneAction, knownPaths), $"{sceneAction.Name}-{salt}");
             }
         }
 

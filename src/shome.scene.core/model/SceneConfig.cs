@@ -26,7 +26,7 @@ namespace shome.scene.core.model
 
         public class SceneDependency
         {
-            public string Name { get; set; }
+            public string Action { get; set; }
             public ActionResult? When { get; set; }
         }
 

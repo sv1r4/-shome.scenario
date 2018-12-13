@@ -61,7 +61,7 @@ namespace shome.provider.yml.unittest
                         {
                             new SceneConfig.SceneDependency
                             {
-                                Name = "testaction",
+                                Action = "testaction",
                                 When = ActionResult.Success
                             }
                         }

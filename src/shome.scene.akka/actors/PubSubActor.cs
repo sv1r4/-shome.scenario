@@ -11,14 +11,14 @@ namespace shome.scene.akka.actors
     public class PubSubActor:ReceiveActor
     {
         private readonly IMqttBasicClient _mqttClient;
-        private readonly IList<SubscriptionBase> _subs;
+        private readonly IList<SubBase> _subs;
         private readonly ILoggingAdapter _logger = Context.GetLogger();
 
         public PubSubActor(IMqttBasicClient mqttClient)
         {
             _mqttClient = mqttClient;
-            _subs = new List<SubscriptionBase>();
-            ReceiveAsync<SubscriptionBase>(async e =>
+            _subs = new List<SubBase>();
+            ReceiveAsync<SubBase>(async e =>
             {
                 if (!_subs.Contains(e))
                 {
@@ -28,7 +28,7 @@ namespace shome.scene.akka.actors
                 switch (e.Type)
                 {
                     case TriggerType.Mqtt:
-                        await _mqttClient.Subscribe(((SubscriptionMqtt) e).Topic);
+                        await _mqttClient.Subscribe(((SubMqtt) e).Topic);
                         break;
                     case TriggerType.Action:
                         break;
@@ -53,7 +53,7 @@ namespace shome.scene.akka.actors
                 foreach (var sub in _subs
                     .Where(x => x.Type == TriggerType.Mqtt
                                 //todo mach topic wildcards
-                                && x is SubscriptionMqtt mx
+                                && x is SubMqtt mx
                                 && e.Topic.Equals(mx.Topic, StringComparison.InvariantCultureIgnoreCase)
                                 && !x.Subscriber.IsNobody()))
                 {
@@ -67,7 +67,26 @@ namespace shome.scene.akka.actors
 
                 _logger.Debug($"MqttMessage delivered to {i} actors");
             });
-            //todo receive action finish event
+            Receive<ActionResultMessage>(e =>
+            {
+                var i = 0;
+                foreach (var sub in _subs
+                    .Where(x => x.Type == TriggerType.Action
+                                && x is SubAction ma
+                                && e.ActionName.Equals(ma.ActionName, StringComparison.InvariantCultureIgnoreCase))
+                                //todo check action result
+                    )
+                {
+                    i++;
+                    sub.Subscriber.Tell(new ActionActor.TriggerAction
+                    {
+                        ActionName = e.ActionName,
+                        Result = e.Result
+                    });
+                }
+
+                _logger.Debug($"ActionMessage delivered to {i} actors");
+            });
         }
 
         public class MqttReceivedMessage
@@ -76,16 +95,22 @@ namespace shome.scene.akka.actors
             public string Message { get; set; }
         }
 
-        
+
+        public class ActionResultMessage
+        {
+            public string ActionName { get; set; }
+            public ActionResult Result { get; set; }
+        }
+
 
         public class UnSub
         {
             public IActorRef Actor;
         }
 
-        public abstract class SubscriptionBase
+        public abstract class SubBase
         {
-            protected SubscriptionBase(TriggerType type)
+            protected SubBase(TriggerType type)
             {
                 Type = type;
             }
@@ -93,21 +118,21 @@ namespace shome.scene.akka.actors
             public IActorRef Subscriber { get; set; }
         }
 
-        public class SubscriptionMqtt:SubscriptionBase
+        public class SubMqtt:SubBase
         {
             
             public string Topic { get; set; }
 
-            public SubscriptionMqtt() : base(TriggerType.Mqtt)
+            public SubMqtt() : base(TriggerType.Mqtt)
             {
             }
         }
 
-        public class SubscriptionAction : SubscriptionBase
+        public class SubAction : SubBase
         {
             public string ActionName { get; set; }
 
-            public SubscriptionAction() : base(TriggerType.Action)
+            public SubAction() : base(TriggerType.Action)
             {
             }
         }
