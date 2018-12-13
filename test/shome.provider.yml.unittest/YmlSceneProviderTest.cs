@@ -158,10 +158,10 @@ actions:
 - name: lr_switch_dblclick
   if:
   - topic: /lr/light/switch/e/clk
-    value: @>=2
+    value: 2
   then:
   - topic: lr/light/c/led
-    message: {""Mode"":1,""R"":0,""G"":0,""B"":0}
+    message: '{""Mode"":1,""R"":0,""G"":0,""B"":0}'
 
 - name: balcony_switch_hold
   if:
@@ -169,7 +169,7 @@ actions:
     value: hold
   then:
   - topic: lr/light/c/led
-    message: {""Mode"":0,""R"":0,""G"":0,""B"":0}
+    message: '{""Mode"":0,""R"":0,""G"":0,""B"":0}'
   - topic: /lr/light/switch/c/main
     message: 0
     
@@ -179,10 +179,9 @@ actions:
     value: hold
   then:
   - topic: lr/light/c/led
-    message: {""Mode"":0,""R"":0,""G"":0,""B"":0}
+    message: '{""Mode"":0,""R"":0,""G"":0,""B"":0}'
   - topic: /lr/light/switch/c/main
-    message: 0
-")]
+    message: 0")]
         [Theory]
         public void YamlDeserialization(string yaml)
         {
