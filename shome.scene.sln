@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{3E8A6D1B-9350-
 		.gitlab-ci.yml = .gitlab-ci.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shome.scene.akka.unittest", "test\shome.scene.akka.unittest\shome.scene.akka.unittest.csproj", "{FEF17A9F-3EEB-476D-B344-D9B46E868C9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C05525F-1CBC-4265-804B-C0BC49AA251B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEF17A9F-3EEB-476D-B344-D9B46E868C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF17A9F-3EEB-476D-B344-D9B46E868C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF17A9F-3EEB-476D-B344-D9B46E868C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF17A9F-3EEB-476D-B344-D9B46E868C9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{D1688F9E-2537-49AE-B863-A00447792CDE} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
 		{D0228B21-57E7-41FF-85FE-B4627896597C} = {F6BD7978-88DE-4A3D-892B-E1513FB3EBD4}
 		{8C05525F-1CBC-4265-804B-C0BC49AA251B} = {3E5A9D29-DF2A-4D8B-AD39-8CC3D30366C5}
+		{FEF17A9F-3EEB-476D-B344-D9B46E868C9D} = {6A91D9EC-E451-4F12-81D3-9DB9A44136C0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CE743421-FAC4-4D72-8E06-2B715132B457}

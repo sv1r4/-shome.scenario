@@ -16,9 +16,11 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using shome.scene.akka;
 using shome.scene.akka.actors;
+using shome.scene.akka.messages;
+using shome.scene.akka.messages.common.events;
 using shome.scene.core.contract;
 using shome.scene.mqtt.config;
-using shome.scene.mqtt.contract;
+using shome.scene.mqtt.core.contract;
 using shome.scene.processor.mqtt;
 using shome.scene.provider.yml;
 using shome.scene.provider.yml.config;
@@ -138,7 +140,7 @@ namespace shome.scene.processor
                 //initial read
 
                 _actorConfigReader = _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>());
-                _actorPubSub = _actorSystem.ActorOf(_actorSystem.DI().Props<PubSubActor>());
+                _actorPubSub = _actorSystem.ActorOf(_actorSystem.DI().Props<PubSubProxyActor>());
                 _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
                 _knownPaths = serviceProvider.GetRequiredService<KnownPaths>();
                 _knownPaths.PubSubActorPath = _actorPubSub.Path;
@@ -529,7 +531,7 @@ namespace shome.scene.processor
         {
             var strMessage = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             _logger.LogDebug($"message received.\n\ttopic='{e.ApplicationMessage.Topic}'\n\tmessage='{strMessage}'");
-            _actorSystem.ActorSelection(_knownPaths.PubSubActorPath).Tell(new PubSubActor.MqttReceivedMessage
+            _actorSystem.ActorSelection(_knownPaths.PubSubActorPath).Tell(new MqttMessageEvent
             {
                 Topic = e.ApplicationMessage.Topic,
                 Message = strMessage

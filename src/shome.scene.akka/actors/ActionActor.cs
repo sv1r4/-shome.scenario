@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
+using shome.scene.akka.messages;
+using shome.scene.akka.messages.common.events;
 using shome.scene.akka.util;
 using shome.scene.core.model;
 
@@ -47,7 +49,7 @@ namespace shome.scene.akka.actors
             _knownPaths = knownPaths;
             _sceneAction = sceneAction;
            
-            BecomePending();
+            BecomeIdle();
             
         }
 
@@ -70,17 +72,17 @@ namespace shome.scene.akka.actors
         /// <summary>
         /// Waiting for dependencies done
         /// </summary>
-        private void BecomePending()
+        private void BecomeIdle()
         {
-            BecomeState(ActionStateEnum.Pending, () =>
+            BecomeState(ActionStateEnum.Idle, () =>
             {
-                _logger.Debug($"Action {_sceneAction.Name} become Pending");
+                _logger.Debug($"Action {_sceneAction.Name} become Idle");
                 _stateObj = new ActionStateObj(_sceneAction);
                 Become(() =>
                 {
-                    Receive<TriggerAction>(t =>
+                    Receive<ActionResultEvent>(e =>
                     {
-                        _stateObj.Update(t);
+                        _stateObj.Update(e);
                         ProcessStateObj();
                     });
                 });
@@ -91,16 +93,16 @@ namespace shome.scene.akka.actors
         /// <summary>
         /// Waiting for 'if' triggers
         /// </summary>
-        private void BecomeRunning()
+        private void BecomePending()
         {
-            BecomeState(ActionStateEnum.Running, () =>
+            BecomeState(ActionStateEnum.Pending, () =>
             {
-                _logger.Debug($"Action {_sceneAction.Name} become Running");
+                _logger.Debug($"Action {_sceneAction.Name} become Pending");
                 Become(() =>
                 {
-                    Receive<TriggerMqtt>(t =>
+                    Receive<MqttMessageEvent>(e =>
                     {
-                        _stateObj.Update(t);
+                        _stateObj.Update(e);
                         ProcessStateObj();
                     });
                 });
@@ -112,23 +114,36 @@ namespace shome.scene.akka.actors
 
         private void ProcessStateObj()
         {
-
-            var was = _currentState.ToString();
             var state = _stateObj.State();
-            _logger.Debug($"Action '{_sceneAction.Name}' state was/now = '{was}/{state.ToString()}'");
-            if (state == ActionStateEnum.Finished)
+            _logger.Debug($"Action '{_sceneAction.Name}' state recent/now = '{_currentState.ToString()}/{state.ToString()}'");
+            //if state the same nothing to do
+            if (_currentState == state) { return;}
+
+            if (state == ActionStateEnum.Active)
             {
-                PubSubPub(new PubSubActor.ActionResultMessage
+                //perform 'then'
+                foreach (var mqttAction in _sceneAction.Then)
+                {
+                    _logger.Debug($"Action '{_sceneAction.Name}' Perform 'then' action publish to  {mqttAction.Topic}");
+                    PubSubPub(new PubSubProxyActor.MqttDoPublish
+                    {
+                        Topic = mqttAction.Topic,
+                        Message = mqttAction.Message
+                    });
+                }
+                //notify done
+                PubSubPub(new ActionResultEvent
                 {
                     ActionName = _sceneAction.Name,
                     Result = ActionResult.Success
                 });
-                BecomePending();
+                //return to initial state
+                BecomeIdle();
             }
-            else if (state == ActionStateEnum.Running)
+            else if (state == ActionStateEnum.Pending)
             {
                 //todo set timeout
-                BecomeRunning();
+                BecomePending();
             }
         }
 
@@ -139,28 +154,12 @@ namespace shome.scene.akka.actors
 
         protected override void PostStop()
         {
-            PubSubPub(new PubSubActor.UnSub { Actor = Self });
+            PubSubPub(new PubSubProxyActor.UnSub { Actor = Self });
             _logger.Debug($"ActionActor - '{Self.Path.Name}' shutdown");
             base.PostStop();
         }
 
-        public interface ITrigger
-        {
-            
-        }
-
-        public class TriggerMqtt:ITrigger
-        {
-            public string Topic { get; set; }
-            public string Message { get; set; }
-        }
-
-        public class TriggerAction:ITrigger
-        {
-            public string ActionName { get; set; }
-            public ActionResult? Result { get; set; }
-        }
-
+       
     }
 
     public class ActionStateObj
@@ -177,52 +176,46 @@ namespace shome.scene.akka.actors
         public ActionStateEnum State()
         {
             //check dependencies
-            if (!_deps.All(x => x.Value)) return ActionStateEnum.Pending;
+            if (!_deps.All(x => x.Value)) return ActionStateEnum.Idle;
             
             //check triggers
             return _triggers.All(x => x.Value) 
-                ? ActionStateEnum.Finished 
-                : ActionStateEnum.Running;
+                ? ActionStateEnum.Active 
+                : ActionStateEnum.Pending;
         }
 
-        public void Update(ActionActor.TriggerAction t)
+        public void Update(ActionResultEvent e)
         {
-            foreach (var dep in _deps.Where(x => x.Key.IsMatch(t)).ToList())
+            foreach (var dep in _deps.Where(x => x.Key.IsMatch(e)).ToList())
             {
                 _deps[dep.Key] = true;
             }
         }
 
-        internal void Update(ActionActor.TriggerMqtt t)
+        internal void Update(MqttMessageEvent e)
         {
-            foreach (var trigger in _triggers.Where(x => x.Key.IsMatch(t)).ToList())
+            foreach (var trigger in _triggers.Where(x => x.Key.IsMatch(e)).ToList())
             {
                 _triggers[trigger.Key] = true;
             }
         }
     }
 
-    public static class TriggerExtensions
-    {
-        public static bool IsMatch(this SceneConfig.SceneIf i, ActionActor.TriggerMqtt t)
-        {
-            //todo math method
-            return i.Topic.Equals(t.Topic, StringComparison.InvariantCultureIgnoreCase)
-                && i.Value.Equals(t.Message,  StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        public static bool IsMatch(this SceneConfig.SceneDependency i, ActionActor.TriggerAction t)
-        {
-            //todo math method
-            return i.Action.Equals(t.ActionName, StringComparison.InvariantCultureIgnoreCase);
-        }
-    }
-
+    
     public enum ActionStateEnum
     {
         Undefined,
+        /// <summary>
+        /// Waiting for dependencies
+        /// </summary>
+        Idle,
+        /// <summary>
+        /// Waiting triggers
+        /// </summary>
         Pending,
-        Running,
-        Finished
+        /// <summary>
+        /// Triggers complete
+        /// </summary>
+        Active
     }
 }

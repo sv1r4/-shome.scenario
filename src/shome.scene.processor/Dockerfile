@@ -18,6 +18,7 @@ RUN dotnet build shome.scene.processor.csproj -c Release -o /app
 
 FROM build AS publish
 RUN dotnet test /src/test/shome.provider.yml.unittest/shome.provider.yml.unittest.csproj -c Release && \
+  dotnet test /src/test/shome.scene.akka.unittest/shome.scene.akka.unittest.csproj -c Release && \
   dotnet publish shome.scene.processor.csproj -c Release -o /app
 
 #arm32v7 runtime for rpi

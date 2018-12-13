@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace shome.scene.mqtt.contract
+namespace shome.scene.mqtt.core.contract
 {
     public interface IMqttBasicClient
     {

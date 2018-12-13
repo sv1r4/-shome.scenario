@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
-using shome.scene.mqtt.contract;
+using shome.scene.mqtt.core.contract;
 
 namespace shome.scene.processor.mqtt
 {

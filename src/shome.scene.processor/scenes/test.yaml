@@ -24,4 +24,4 @@ actions:
     value: test
   then:
   - topic: bath/switch/e/state
-    message: test
+    message: done

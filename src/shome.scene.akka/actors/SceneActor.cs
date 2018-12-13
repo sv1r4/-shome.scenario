@@ -11,12 +11,6 @@ namespace shome.scene.akka.actors
 
         public SceneActor(SceneConfig sceneConfig, KnownPaths knownPaths)
         {
-
-            Receive<PubSubActor.MqttReceivedMessage>(e =>
-            {
-                _logger.Debug($"todo handle message {e.Topic}@{e.Message}");
-            });
-
             var salt = DateTime.Now.Ticks.ToString();
             foreach (var sceneAction in sceneConfig.Actions)
             {

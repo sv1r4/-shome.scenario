@@ -94,8 +94,17 @@ actions:
   - topic: bath/sound/c/power
     message: 1
   dependsOn:
-  - name: testaction
-    when: Success
+  - action: testaction
+    when: success
+   
+
+- name: testaction
+  if:
+  - topic: bath/switch/e/state
+    value: test
+  then:
+  - topic: bath/switch/e/state
+    message: done
 ")]
         [Theory]
         public void YamlDeserialization(string yaml)
