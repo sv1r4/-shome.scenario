@@ -1,6 +1,7 @@
 ﻿using System;
 using Akka.Actor;
 using Akka.Event;
+using shome.scene.akka.util;
 using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
@@ -11,10 +12,9 @@ namespace shome.scene.akka.actors
 
         public SceneActor(SceneConfig sceneConfig, KnownPaths knownPaths)
         {
-            var salt = DateTime.Now.Ticks.ToString();
             foreach (var sceneAction in sceneConfig.Actions)
             {
-                Context.ActorOf(ActionActor.Props(sceneAction, knownPaths), $"{sceneAction.Name}-{salt}");
+                Context.ActorOf(ActionActor.Props(sceneAction, knownPaths), $"{sceneAction.Name}-{Salt.Gen()}");
             }
         }
 
