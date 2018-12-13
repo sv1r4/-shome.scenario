@@ -1,5 +1,6 @@
 ﻿using System;
 using Akka.Actor;
+using shome.scene.akka.util;
 using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
@@ -15,9 +16,8 @@ namespace shome.scene.akka.actors
                 var old = Context.System.ActorSelection($"/user/$a/$a/{e.SceneConfig.Name}-*");
                 old.Tell(PoisonPill.Instance);
 
-                var salt = DateTime.Now.Ticks.ToString();
                 //start new
-                Context.ActorOf(SceneActor.Props(e.SceneConfig, knownPaths), $"{e.SceneConfig.Name}-{salt}");
+                Context.ActorOf(SceneActor.Props(e.SceneConfig, knownPaths), $"{e.SceneConfig.Name}-{Salt.Gen()}");
             });
             //delete
             Receive<RemoveScene>(e =>
