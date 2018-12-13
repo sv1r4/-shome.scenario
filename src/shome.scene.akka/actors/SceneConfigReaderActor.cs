@@ -1,41 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Akka.Actor;
 using Akka.DI.Core;
-using Microsoft.Extensions.Logging;
+using Akka.Event;
 using shome.scene.core.contract;
+using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
 {
     public class SceneConfigReaderActor : ReceiveActor
     {
         private readonly IActorRef _creatorActor;
+        private readonly ILoggingAdapter _logger = Context.GetLogger();
+        private IReadOnlyList<SceneConfig> _configs = Array.Empty<SceneConfig>();
 
-        protected override SupervisorStrategy SupervisorStrategy()
-        {
-            return new OneForOneStrategy(
-                maxNrOfRetries: 10,
-                withinTimeRange: TimeSpan.FromSeconds(5),
-                localOnlyDecider: ex =>
-                {
-                    switch (ex)
-                    {
-                        case ArithmeticException ae:
-                            return Directive.Resume;
-                        case NullReferenceException nre:
-                            return Directive.Restart;
-                        case ArgumentException are:
-                            return Directive.Stop;
-                        default:
-                            return Directive.Escalate;
-                    }
-                });
-        }
-
-        public SceneConfigReaderActor(ILogger<SceneConfigReaderActor> logger, ISceneProvider sceneProvider)
+        public SceneConfigReaderActor(ISceneProvider sceneProvider)
         {
             Receive<GetScenesConfig>(m =>
             {
-                foreach (var scene in sceneProvider.GetConfigs())
+                var newConfigs = sceneProvider.GetConfigs().ToList();
+                var removedConfigs = _configs.Where(x => newConfigs.All(nx => !x.Name.Equals(nx.Name))).ToList();
+                foreach (var removedConfig in removedConfigs)
+                {
+                    _creatorActor.Tell(new SceneCreatorActor.RemoveScene
+                    {
+                        SceneConfig = removedConfig
+                    });
+                }
+                _configs = newConfigs;
+                foreach (var scene in _configs)
                 {
                     _creatorActor.Tell(new SceneCreatorActor.CreateScene
                     {
@@ -44,7 +38,7 @@ namespace shome.scene.akka.actors
                 }
             });
 
-            logger.LogDebug($"Create scene Creator {nameof(SceneCreatorActor)}");
+            _logger.Debug($"Create scene Creator {nameof(SceneCreatorActor)}");
             var props = Context.DI().Props<SceneCreatorActor>();
             _creatorActor = Context.ActorOf(props);
         }
