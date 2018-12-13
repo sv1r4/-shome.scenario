@@ -8,6 +8,10 @@ services:
       MqttConfig__Port: 1883
       MqttConfig__User:""
       MqttConfig__Password:""
+    volumes:
+      - type: bind
+        source: ./scenes
+        target: /app/scenes
     deploy:
       replicas: 1
       restart_policy:

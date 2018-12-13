@@ -13,6 +13,10 @@ services:
       dockerfile: src/shome.scene.processor/Dockerfile
     depends_on:
       - mosquitto
+    volumes:
+      - type: bind
+        source: ./scenes
+        target: /app/scenes
 
   mosquitto:
     image: library/eclipse-mosquitto
