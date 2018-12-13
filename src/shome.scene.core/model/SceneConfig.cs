@@ -21,8 +21,9 @@ namespace shome.scene.core.model
             public string Topic { get; set; }
             public string Value { get; set; }
             public string JsonMember { get; set; }
-            public string JsonValue { get; set; }
         }
+
+
 
         public class SceneDependency
         {

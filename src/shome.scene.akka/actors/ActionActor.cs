@@ -126,7 +126,7 @@ namespace shome.scene.akka.actors
                     PubSubPub(new PubSubProxyActor.MqttDoPublish
                     {
                         Topic = mqttAction.Topic,
-                        Message = mqttAction.Message
+                        Message = _stateObj.GetThenMessage(mqttAction.Message)
                     });
                 }
                 //notify done

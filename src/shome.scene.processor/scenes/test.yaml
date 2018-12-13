@@ -22,6 +22,24 @@ actions:
   if:
   - topic: bath/switch/e/state
     value: test
+    jsonMember: j1
   then:
   - topic: bath/switch/e/state
     message: done
+    
+    
+- name: t2
+  if:
+  - topic: t2/value
+    value: "@<=1.5"
+  then:
+  - topic: t2/result
+    message: done
+    
+- name: t3
+  if:
+  - topic: tt3/value
+  - topic: tt3/value2
+  then:
+  - topic: tt3/result
+    message: "@proxy"
