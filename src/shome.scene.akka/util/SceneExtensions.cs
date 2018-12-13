@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using shome.scene.akka.actors;
-using shome.scene.akka.messages;
 using shome.scene.akka.messages.common.events;
 using shome.scene.core.model;
 

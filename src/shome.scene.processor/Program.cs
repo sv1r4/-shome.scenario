@@ -16,7 +16,6 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using shome.scene.akka;
 using shome.scene.akka.actors;
-using shome.scene.akka.messages;
 using shome.scene.akka.messages.common.events;
 using shome.scene.core.contract;
 using shome.scene.mqtt.config;

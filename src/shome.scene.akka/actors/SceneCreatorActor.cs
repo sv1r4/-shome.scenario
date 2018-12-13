@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Akka.Actor;
-using Akka.DI.Core;
 using Microsoft.Extensions.Logging;
 using shome.scene.core.model;
 

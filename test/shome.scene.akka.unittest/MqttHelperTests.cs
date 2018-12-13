@@ -1,4 +1,3 @@
-using System;
 using shome.scene.akka.util;
 using Xunit;
 
