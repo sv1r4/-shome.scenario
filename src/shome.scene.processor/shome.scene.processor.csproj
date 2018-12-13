@@ -2,18 +2,30 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shome.provider.yml\shome.provider.yml.csproj" />
+    <Compile Remove="config\**" />
+    <EmbeddedResource Remove="config\**" />
+    <None Remove="config\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+    <PackageReference Include="Scrutor" Version="3.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
+    <ProjectReference Include="..\shome.scene.akka\shome.scene.akka.csproj" />
+    <ProjectReference Include="..\shome.scene.mqtt.mqttnet\shome.scene.mqtt.mqttnet.csproj" />
+    <ProjectReference Include="..\shome.scene.provider.yml\shome.scene.provider.yml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="scenes\test.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

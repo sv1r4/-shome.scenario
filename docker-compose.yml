@@ -3,6 +3,20 @@ version: '3.4'
 services:
   shome-scene-processor:
     image: "${IMAGE_PREFIX}shome.scene.processor:${TAG}"
+    environment:
+      MqttConfig__Host: "mosquitto"
+      MqttConfig__Port: 1883
+      MqttConfig__User: ""
+      MqttConfig__Password: ""
     build:
       context: .
       dockerfile: src/shome.scene.processor/Dockerfile
+    depends_on:
+      - mosquitto
+    volumes:
+      - type: bind
+        source: ./scenes
+        target: /app/scenes
+
+  mosquitto:
+    image: library/eclipse-mosquitto

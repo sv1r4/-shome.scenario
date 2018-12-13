@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\shome.scene.provider.yml\shome.scene.provider.yml.csproj" />
+    <ProjectReference Include="..\..\src\shome.scene.core\shome.scene.core.csproj" />
   </ItemGroup>
 
 </Project>
