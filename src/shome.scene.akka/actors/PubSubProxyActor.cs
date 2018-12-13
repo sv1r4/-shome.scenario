@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
-using shome.scene.core;
 using shome.scene.core.events;
 using shome.scene.core.model;
 using shome.scene.core.util;
@@ -21,7 +20,14 @@ namespace shome.scene.akka.actors
         {
             _mqttClient = mqttClient;
             _subs = new List<SubBase>();
-            #region manages subscribtions
+
+            InitManageSubscriptions();
+            InitPassMessagesToSubscribers();
+            InitProxyToMqttBroker();
+        }
+
+        private void InitManageSubscriptions()
+        {
             ReceiveAsync<SubBase>(async e =>
             {
                 if (!_subs.Contains(e))
@@ -32,7 +38,7 @@ namespace shome.scene.akka.actors
                 switch (e.Type)
                 {
                     case TriggerTypeEnum.Mqtt:
-                        await _mqttClient.Subscribe(((SubToMqtt) e).Topic);
+                        await _mqttClient.Subscribe(((SubToMqtt)e).Topic);
                         break;
                     case TriggerTypeEnum.Action:
                         break;
@@ -51,8 +57,10 @@ namespace shome.scene.akka.actors
 
                 _logger.Debug($"UnSub received. Subscribers count = {_subs.Count}");
             });
-            #endregion
-            #region transfer messages to subscribers
+        }
+
+        private void InitPassMessagesToSubscribers()
+        {
             Receive<MqttMessageEvent>(mqttEvent =>
             {
                 var i = 0;
@@ -84,13 +92,14 @@ namespace shome.scene.akka.actors
 
                 _logger.Debug($"ActionMessage delivered to {i} actors");
             });
-            #endregion
-            #region Proxy to Mqtt brocker
+        }
+
+        private void InitProxyToMqttBroker()
+        {
             ReceiveAsync<MqttDoPublish>(async e =>
             {
                 await _mqttClient.Publish(e.Topic, e.Message, e.Retained, e.Qos);
             });
-            #endregion
         }
 
         public class MqttDoPublish

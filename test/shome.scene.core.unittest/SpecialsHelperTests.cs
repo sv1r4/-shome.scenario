@@ -1,4 +1,4 @@
-using shome.scene.core.util;
+п»їusing shome.scene.core.util;
 using Xunit;
 
 namespace shome.scene.core.unittest
@@ -7,18 +7,18 @@ namespace shome.scene.core.unittest
     {
         [Theory]
         [InlineData("test", "test", true)]
-        [InlineData("тест", "тест", true)]
-        [InlineData("вкл*св*", "включи свет пожалуйста", true)]
-        [InlineData("вкл*св*", "  включи свет  ", true)]
-        [InlineData("вкл*св*", "включи плиз свет", true)]
-        [InlineData("*вкл* св*", "будь добр олег включи свет", true)]
-        [InlineData("вкл* св*", "включи  свет пожалуйста", true)]
+        [InlineData("С‚РµСЃС‚", "С‚РµСЃС‚", true)]
+        [InlineData("РІРєР»*СЃРІ*", "РІРєР»СЋС‡Рё СЃРІРµС‚ РїРѕР¶Р°Р»СѓР№СЃС‚Р°", true)]
+        [InlineData("РІРєР»*СЃРІ*", "  РІРєР»СЋС‡Рё СЃРІРµС‚  ", true)]
+        [InlineData("РІРєР»*СЃРІ*", "РІРєР»СЋС‡Рё РїР»РёР· СЃРІРµС‚", true)]
+        [InlineData("*РІРєР»* СЃРІ*", "Р±СѓРґСЊ РґРѕР±СЂ РѕР»РµРі РІРєР»СЋС‡Рё СЃРІРµС‚", true)]
+        [InlineData("РІРєР»* СЃРІ*", "РІРєР»СЋС‡Рё  СЃРІРµС‚ РїРѕР¶Р°Р»СѓР№СЃС‚Р°", true)]
         [InlineData("test", "test2", false)]
-        [InlineData("тест", "тес", false)]
-        [InlineData("вкл*св", "включи свет пожалуйста", false)]
-        [InlineData("вкл* св*", "включисвет", false)]
-        [InlineData("вкл* св*", "выключи свет", false)]
-        [InlineData("вкл* св*", "будь добр олег включи свет", false)]
+        [InlineData("С‚РµСЃС‚", "С‚РµСЃ", false)]
+        [InlineData("РІРєР»*СЃРІ", "РІРєР»СЋС‡Рё СЃРІРµС‚ РїРѕР¶Р°Р»СѓР№СЃС‚Р°", false)]
+        [InlineData("РІРєР»* СЃРІ*", "РІРєР»СЋС‡РёСЃРІРµС‚", false)]
+        [InlineData("РІРєР»* СЃРІ*", "РІС‹РєР»СЋС‡Рё СЃРІРµС‚", false)]
+        [InlineData("РІРєР»* СЃРІ*", "Р±СѓРґСЊ РґРѕР±СЂ РѕР»РµРі РІРєР»СЋС‡Рё СЃРІРµС‚", false)]
         public void IsSimpleMatchTests(string pattern, string value, bool expected)
         {
             Assert.Equal(expected, SpecialsHelper.IsSimpleMatch(pattern, value));
