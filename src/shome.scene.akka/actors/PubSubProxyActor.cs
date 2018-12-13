@@ -6,6 +6,7 @@ using Akka.Event;
 using shome.scene.core;
 using shome.scene.core.events;
 using shome.scene.core.model;
+using shome.scene.core.util;
 using shome.scene.mqtt.core.contract;
 
 namespace shome.scene.akka.actors
@@ -30,10 +31,10 @@ namespace shome.scene.akka.actors
 
                 switch (e.Type)
                 {
-                    case TriggerType.Mqtt:
+                    case TriggerTypeEnum.Mqtt:
                         await _mqttClient.Subscribe(((SubToMqtt) e).Topic);
                         break;
-                    case TriggerType.Action:
+                    case TriggerTypeEnum.Action:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -55,8 +56,9 @@ namespace shome.scene.akka.actors
             Receive<MqttMessageEvent>(mqttEvent =>
             {
                 var i = 0;
+                //todo resolve double match topic checking inside actor and hear
                 foreach (var sub in _subs
-                    .Where(x => x.Type == TriggerType.Mqtt
+                    .Where(x => x.Type == TriggerTypeEnum.Mqtt
                                 && x is SubToMqtt mx
                                 && MqttHelper.IsSubscribed(patternTopic: mx.Topic, actualTopic: mqttEvent.Topic)
                                 && !x.Subscriber.IsNobody()))
@@ -70,12 +72,11 @@ namespace shome.scene.akka.actors
             Receive<ActionResultEvent>(actionEvent =>
             {
                 var i = 0;
+                //todo resolve double match action checking inside actor and hear
                 foreach (var sub in _subs
-                    .Where(x => x.Type == TriggerType.Action
+                    .Where(x => x.Type == TriggerTypeEnum.Action
                                 && x is SubToAction ma
-                                && actionEvent.ActionName.Equals(ma.ActionName, StringComparison.InvariantCultureIgnoreCase))
-                                //todo check action result
-                    )
+                                && actionEvent.ActionName.Equals(ma.ActionName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     i++;
                     sub.Subscriber.Tell(actionEvent);
@@ -107,11 +108,11 @@ namespace shome.scene.akka.actors
 
         public abstract class SubBase
         {
-            protected SubBase(TriggerType type)
+            protected SubBase(TriggerTypeEnum type)
             {
                 Type = type;
             }
-            public TriggerType Type { get;}
+            public TriggerTypeEnum Type { get;}
             public IActorRef Subscriber { get; set; }
         }
 
@@ -119,7 +120,7 @@ namespace shome.scene.akka.actors
         {
             public string Topic { get; set; }
 
-            public SubToMqtt() : base(TriggerType.Mqtt)
+            public SubToMqtt() : base(TriggerTypeEnum.Mqtt)
             {
             }
         }
@@ -128,7 +129,7 @@ namespace shome.scene.akka.actors
         {
             public string ActionName { get; set; }
 
-            public SubToAction() : base(TriggerType.Action)
+            public SubToAction() : base(TriggerTypeEnum.Action)
             {
             }
         }

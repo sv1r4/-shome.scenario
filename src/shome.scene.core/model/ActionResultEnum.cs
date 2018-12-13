@@ -1,6 +1,6 @@
 ﻿namespace shome.scene.core.model
 {
-    public enum ActionResult
+    public enum ActionResultEnum
     {
         Success,
         Fail

@@ -5,6 +5,6 @@ namespace shome.scene.core.events
     public class ActionResultEvent
     {
         public string ActionName { get; set; }
-        public ActionResult Result { get; set; }
+        public ActionResultEnum Result { get; set; }
     }
 }

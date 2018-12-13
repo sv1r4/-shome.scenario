@@ -1,6 +1,6 @@
 ﻿namespace shome.scene.core.model
 {
-    public enum TriggerType
+    public enum TriggerTypeEnum
     {
         Mqtt,
         Action,

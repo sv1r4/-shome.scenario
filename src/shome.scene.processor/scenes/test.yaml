@@ -42,4 +42,12 @@ actions:
   - topic: tt3/value2
   then:
   - topic: tt3/result
-    message: "@proxy"
+    message: "@proxy1"
+
+- name: t4
+  if:
+  - topic: t4/value
+    value: "@match *test*"
+  then:
+  - topic: t4/result
+    message: mathes

@@ -5,7 +5,7 @@ using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
 {
-    public class SceneActor:ReceiveActor //todo FSM actor?
+    public class SceneActor:ReceiveActor
     {
         private readonly ILoggingAdapter _logger = Context.GetLogger();
 

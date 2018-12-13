@@ -37,7 +37,6 @@ namespace shome.scene.akka.actors
             {
                 foreach (var scene in sceneProvider.GetConfigs())
                 {
-                    //todo stop removed actors
                     _creatorActor.Tell(new SceneCreatorActor.CreateScene
                     {
                         SceneConfig = scene

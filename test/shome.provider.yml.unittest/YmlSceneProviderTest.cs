@@ -62,7 +62,7 @@ namespace shome.provider.yml.unittest
                             new SceneConfig.SceneDependency
                             {
                                 Action = "testaction",
-                                When = ActionResult.Success
+                                When = ActionResultEnum.Success
                             }
                         }
                     }
@@ -77,6 +77,53 @@ namespace shome.provider.yml.unittest
             _output.WriteLine(yaml);
         }
 
+        [InlineData(@"
+name: scene
+actions:
+- name: LightOn
+  if:
+  - topic: bath/switch/e/state
+    value: 1
+  then:
+  - topic: bath/light/0/c/state
+    message: 1
+  - topic: bath/light/1/c/state
+    message: 1
+  - topic: bath/mirror/lcd/c/state
+    message: 1
+  - topic: bath/sound/c/power
+    message: 1
+  dependsOn:
+  - action: testaction
+    when: success
+   
+
+- name: testaction
+  if:
+  - topic: bath/switch/e/state
+    value: test
+    jsonMember: j1
+  then:
+  - topic: bath/switch/e/state
+    message: done
+    
+    
+- name: t2
+  if:
+  - topic: t2/value
+    value: ""@<=1.5""
+  then:
+  - topic: t2/result
+    message: done
+    
+- name: t3
+  if:
+  - topic: tt3/value
+  - topic: tt3/value2
+  then:
+  - topic: tt3/result
+    message: ""@proxy1""
+")]
         [InlineData(@"
 name: scene
 actions:

@@ -5,6 +5,7 @@ using shome.scene.akka.util;
 using shome.scene.core;
 using shome.scene.core.events;
 using shome.scene.core.model;
+using shome.scene.core.util;
 
 namespace shome.scene.akka.actors
 {
@@ -126,14 +127,17 @@ namespace shome.scene.akka.actors
                     PubSubPub(new PubSubProxyActor.MqttDoPublish
                     {
                         Topic = mqttAction.Topic,
-                        Message = _stateObj.GetThenMessage(mqttAction.Message)
+                        Message = new ThenMessageBuilder()
+                            .WithRawMessage(mqttAction.Message)
+                            .WithTriggersState(_stateObj.TriggersState)
+                            .Build()
                     });
                 }
                 //notify done
                 PubSubPub(new ActionResultEvent
                 {
                     ActionName = _sceneAction.Name,
-                    Result = ActionResult.Success
+                    Result = ActionResultEnum.Success
                 });
                 //return to initial state
                 BecomeIdle();

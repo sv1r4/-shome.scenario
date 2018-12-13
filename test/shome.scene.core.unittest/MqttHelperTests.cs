@@ -1,3 +1,4 @@
+using shome.scene.core.util;
 using Xunit;
 
 namespace shome.scene.core.unittest
