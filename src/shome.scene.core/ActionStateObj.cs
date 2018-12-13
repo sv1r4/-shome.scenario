@@ -8,44 +8,44 @@ namespace shome.scene.core
 {
     public class ActionStateObj
     {
-        private readonly IDictionary<SceneConfig.SceneDependency, DepStatus> _deps;
-        private readonly IDictionary<SceneConfig.SceneIf, IfStatus> _triggers;
+        private readonly IDictionary<SceneConfig.SceneDependency, DepStatus> _depState;
+        private readonly IDictionary<SceneConfig.SceneIf, IfStatus> _triggerState;
 
         public ActionStateObj(SceneConfig.SceneAction sceneAction)
         {
-            _deps = sceneAction.DependsOn.ToDictionary(x => x, _ => new DepStatus());
-            _triggers = sceneAction.If.ToDictionary(x => x, _ => new IfStatus());
+            _depState = sceneAction.DependsOn.ToDictionary(x => x, _ => new DepStatus());
+            _triggerState = sceneAction.If.ToDictionary(x => x, _ => new IfStatus());
         }
 
         public ActionStateEnum State()
         {
             //check dependencies
-            if (!_deps.All(x => x.Value.IsRised)) return ActionStateEnum.Idle;
+            if (!_depState.All(x => x.Value.IsRaised)) return ActionStateEnum.Idle;
 
             //check triggers
-            return _triggers.All(x => x.Value.IsRised)
+            return _triggerState.All(x => x.Value.IsRaised)
                 ? ActionStateEnum.Active
                 : ActionStateEnum.Pending;
         }
 
         public void Update(ActionResultEvent e)
         {
-            foreach (var dep in _deps.Where(x => IsMatch(x.Key, e)).ToList())
+            foreach (var dep in _depState.Where(x => IsMatch(x.Key, e)).ToList())
             {
-                _deps[dep.Key] = new DepStatus
+                _depState[dep.Key] = new DepStatus
                 {
-                    IsRised = true
+                    IsRaised = true
                 }; 
             }
         }
 
         public void Update(MqttMessageEvent e)
         {
-            foreach (var trigger in _triggers.Where(x => IsMatch(x.Key, e)).ToList())
+            foreach (var trigger in _triggerState.Where(x => IsMatch(x.Key, e)).ToList())
             {
-                _triggers[trigger.Key] = new IfStatus
+                _triggerState[trigger.Key] = new IfStatus
                 {
-                    IsRised = true,
+                    IsRaised = true,
                     ReceivedMessage = e.Message
                 };
             }
@@ -67,13 +67,13 @@ namespace shome.scene.core
 
         private class IfStatus
         {
-            public bool IsRised { get; set; }
+            public bool IsRaised { get; set; }
             public string ReceivedMessage { get; set; }
         }
 
         private class DepStatus
         {
-            public bool IsRised { get; set; }
+            public bool IsRaised { get; set; }
         }
     }
 }
