@@ -1,4 +1,4 @@
-﻿namespace shome.scene.mqtt.config
+﻿namespace shome.scene.mqtt.core.config
 {
     public class MqttConfig
     {

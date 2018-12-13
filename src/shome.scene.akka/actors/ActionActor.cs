@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Akka.Actor;
 using Akka.Event;
-using shome.scene.akka.messages.common.events;
 using shome.scene.akka.util;
+using shome.scene.core;
+using shome.scene.core.events;
 using shome.scene.core.model;
 
 namespace shome.scene.akka.actors
@@ -161,60 +160,7 @@ namespace shome.scene.akka.actors
        
     }
 
-    public class ActionStateObj
-    {
-        private readonly IDictionary<SceneConfig.SceneDependency, bool> _deps;
-        private readonly IDictionary<SceneConfig.SceneIf, bool> _triggers;
-
-        public ActionStateObj(SceneConfig.SceneAction sceneAction)
-        {
-            _deps = sceneAction.DependsOn.ToDictionary(x => x, _=>false);
-            _triggers = sceneAction.If.ToDictionary(x => x, _=>false);
-        }
-
-        public ActionStateEnum State()
-        {
-            //check dependencies
-            if (!_deps.All(x => x.Value)) return ActionStateEnum.Idle;
-            
-            //check triggers
-            return _triggers.All(x => x.Value) 
-                ? ActionStateEnum.Active 
-                : ActionStateEnum.Pending;
-        }
-
-        public void Update(ActionResultEvent e)
-        {
-            foreach (var dep in _deps.Where(x => x.Key.IsMatch(e)).ToList())
-            {
-                _deps[dep.Key] = true;
-            }
-        }
-
-        internal void Update(MqttMessageEvent e)
-        {
-            foreach (var trigger in _triggers.Where(x => x.Key.IsMatch(e)).ToList())
-            {
-                _triggers[trigger.Key] = true;
-            }
-        }
-    }
+   
 
     
-    public enum ActionStateEnum
-    {
-        Undefined,
-        /// <summary>
-        /// Waiting for dependencies
-        /// </summary>
-        Idle,
-        /// <summary>
-        /// Waiting triggers
-        /// </summary>
-        Pending,
-        /// <summary>
-        /// Triggers complete
-        /// </summary>
-        Active
-    }
 }

@@ -1,4 +1,4 @@
-﻿namespace shome.scene.akka.messages.common.events
+﻿namespace shome.scene.core.events
 {
     public class MqttMessageEvent
     {

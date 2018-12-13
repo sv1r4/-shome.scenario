@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace shome.scene.akka.util
+namespace shome.scene.core
 {
     public static class MqttHelper
     {

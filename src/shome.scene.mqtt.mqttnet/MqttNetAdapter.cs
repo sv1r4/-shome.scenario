@@ -5,7 +5,7 @@ using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
 using shome.scene.mqtt.core.contract;
 
-namespace shome.scene.processor.mqtt
+namespace shome.scene.mqtt.mqttnet
 {
     public class MqttNetAdapter:IMqttBasicClient
     {

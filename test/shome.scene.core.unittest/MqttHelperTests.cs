@@ -1,7 +1,6 @@
-using shome.scene.akka.util;
 using Xunit;
 
-namespace shome.scene.akka.unittest
+namespace shome.scene.core.unittest
 {
     public class MqttHelperTests
     {

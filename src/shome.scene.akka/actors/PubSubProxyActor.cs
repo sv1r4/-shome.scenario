@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
-using shome.scene.akka.messages.common.events;
-using shome.scene.akka.util;
+using shome.scene.core;
+using shome.scene.core.events;
 using shome.scene.core.model;
 using shome.scene.mqtt.core.contract;
 
