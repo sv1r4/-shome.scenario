@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Akka.Actor;
-using Akka.Configuration;
 using Akka.DI.Core;
 using Akka.DI.Microsoft;
 using Microsoft.Extensions.Configuration;
@@ -157,43 +155,11 @@ namespace shome.scene.processor
 
         #region infrastructure akka
 
-        private static readonly IDictionary<LogLevel, string> MsAkkaLogLevelMap = new Dictionary<LogLevel, string>
-        {
-            {LogLevel.Debug, "DEBUG"},
-            {LogLevel.Trace, "DEBUG"},
-            {LogLevel.Information, "INFO"},
-            {LogLevel.Warning, "WARN"},
-            {LogLevel.Error, "ERROR"},
-            {LogLevel.Critical, "ERROR"},
-            {LogLevel.None, "ERROR"}
-        };
-
+     
 
         private static ActorSystem InitActorSystem(IConfigurationRoot config)
         {
-            return ActorSystem.Create("shome-scene-actor-system", InitAkkaConfig(config));
-        }
-
-        private static Config InitAkkaConfig(IConfigurationRoot configuration)
-        {
-            var logConfig = configuration.GetSection("Logging");
-            var logLevels = logConfig.GetSection("LogLevel").Get<IDictionary<string, LogLevel>>();
-
-            if (!logLevels.TryGetValue("Akka", out var msAkkaLevel))
-            {
-                if (!logLevels.TryGetValue("Default", out msAkkaLevel))
-                {
-                    msAkkaLevel = LogLevel.Debug;
-                }
-            }
-
-            var config = ConfigurationFactory.ParseString($@"
-  akka{{
-    stdout-loglevel = ""{MsAkkaLogLevelMap[msAkkaLevel]}""
-    loglevel = ""{MsAkkaLogLevelMap[msAkkaLevel]}""
-  }}")
-                .WithFallback(ConfigurationFactory.Default());
-            return config;
+            return ActorSystem.Create("shome-scene-actor-system", new AkkaConfigAdapter(config).GetAkkaConfig());
         }
 
         // ReSharper disable once UnusedMethodReturnValue.Local
