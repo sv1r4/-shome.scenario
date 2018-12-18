@@ -8,7 +8,7 @@ services:
       MqttConfig__Port: 1883
       MqttConfig__User: ""
       MqttConfig__Password: ""
-      Logging__LogLevel__Default: "Debug"
+      Logging__LogLevel__Default: "Warning"
       Logging__LogLevel__Akka: "Information"
     volumes:
       - "/home/docker/shome.scene/scenes:/app/scenes"
