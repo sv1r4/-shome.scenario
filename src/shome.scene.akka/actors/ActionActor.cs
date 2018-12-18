@@ -120,6 +120,7 @@ namespace shome.scene.akka.actors
 
             if (state == ActionStateEnum.Active)
             {
+                _logger.Info($"Action '{_sceneAction.Name}' activated");
                 //perform 'then'
                 foreach (var mqttAction in _sceneAction.Then)
                 {

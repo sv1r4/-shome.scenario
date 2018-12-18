@@ -9,7 +9,7 @@ services:
       MqttConfig__User: ""
       MqttConfig__Password: ""
       Logging__LogLevel__Default: "Debug"
-      Logging__LogLevel__Akka: "Debug"
+      Logging__LogLevel__Akka: "Information"
     volumes:
       - "/home/docker/shome.scene/scenes:/app/scenes"
     deploy:
