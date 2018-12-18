@@ -1,5 +1,4 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Event;
 using shome.scene.akka.util;
 using shome.scene.core.model;
@@ -27,12 +26,12 @@ namespace shome.scene.akka.actors
         protected override void PreStart()
         {
             base.PreStart();
-            _logger.Debug($"SceneActor - '{this.Self.Path.Name}' starting");
+            _logger.Info($"SceneActor - '{this.Self.Path.Name}' starting");
         }
 
         protected override void PostStop()
         {
-            _logger.Debug($"SceneActor - '{this.Self.Path.Name}' shutdown");
+            _logger.Info($"SceneActor - '{this.Self.Path.Name}' shutdown");
             base.PostStop();
         }
 
