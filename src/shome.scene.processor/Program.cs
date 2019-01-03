@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using Quartz;
 using Quartz.Impl;
 using shome.scene.akka;
 using shome.scene.akka.actors;
@@ -24,10 +25,12 @@ using shome.scene.core.events;
 using shome.scene.mqtt.core.config;
 using shome.scene.mqtt.core.contract;
 using shome.scene.mqtt.mqttnet;
+using shome.scene.processor.quartz;
 using shome.scene.provider.yml;
 using shome.scene.provider.yml.config;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using SchedulerException = Akka.Actor.SchedulerException;
 
 namespace shome.scene.processor
 {
@@ -116,46 +119,60 @@ namespace shome.scene.processor
                 #endregion
 
                 #region services
+                // ReSharper disable RedundantTypeArgumentsOfMethod
 
                 var services = new ServiceCollection();
+
+                #region log
                 services.AddLogging(logging =>
                 {
                     logging.AddConfiguration(config.GetSection("Logging"));
                     logging.AddConsole();
                 });
-
+                #endregion
+                #region yaml
                 services.AddSingleton<ISceneProvider, YamlSceneProvider>();
-
-                // ReSharper disable RedundantTypeArgumentsOfMethod
+                services.AddSingleton<Deserializer>(new DeserializerBuilder()
+                    .WithNamingConvention(new CamelCaseNamingConvention())
+                    .Build());
+                services.AddSingleton<IFileProvider>(_fileProvider);
+                #endregion
+                #region mqtt
                 services.AddSingleton<IManagedMqttClient>(sp =>
                 {
                     _mqtt = InitMqtt(cfgMqtt).GetAwaiter().GetResult();
                     return _mqtt;
                 });
-
+                services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
+                #endregion
+                #region quartz
+                services.Scan(scan =>
+                    scan.FromAssembliesOf(typeof(TellScheduleJob))
+                        .AddClasses(x => x.AssignableTo<IJob>())
+                        .AsSelf()
+                        .WithTransientLifetime());
                 services.AddSingleton<ISceneActionScheduler>(sp =>
                 {
-                    _quartzScheduler = InitQuartz().GetAwaiter().GetResult();
+                    _quartzScheduler = InitQuartz(sp).GetAwaiter().GetResult();
                     return new QuartzActionScheduler(_quartzScheduler, sp.GetService<ILogger<QuartzActionScheduler>>());
                 });
 
+                #endregion
+                #region akka
                 services.AddSingleton<ActorSystem>(_actorSystem);
-                services.AddSingleton<IFileProvider>(_fileProvider);
-                services.AddSingleton<Deserializer>(new DeserializerBuilder()
-                    .WithNamingConvention(new CamelCaseNamingConvention())
-                    .Build());
-                // ReSharper restore RedundantTypeArgumentsOfMethod
-
-                services.AddTransient<IMqttBasicClient, MqttNetAdapter>();
+                
                 services.Scan(scan =>
                     scan.FromAssembliesOf(typeof(SceneCreatorActor))
                         .AddClasses(x => x.AssignableTo<ReceiveActor>())
                         .AsSelf()
                         .WithScopedLifetime());
+
                 services.AddSingleton(new KnownPaths());
+                #endregion
+
+                var serviceProvider = services.BuildServiceProvider();
                 
-                var serviceProvider = services.BuildServiceProvider(); 
-                 
+                // ReSharper restore RedundantTypeArgumentsOfMethod
                 #endregion
 
                 InitActorSystemDI(_actorSystem, serviceProvider);
@@ -177,8 +194,6 @@ namespace shome.scene.processor
         }
 
         #region infrastructure akka
-
-     
 
         private static ActorSystem InitActorSystem(IConfigurationRoot config)
         {
@@ -253,7 +268,7 @@ namespace shome.scene.processor
 
         #region imfrastructure quartz
 
-        private static async Task<Quartz.IScheduler> InitQuartz()
+        private static async Task<Quartz.IScheduler> InitQuartz(IServiceProvider serviceProvider)
         {
             var props = new NameValueCollection
             {
@@ -261,7 +276,7 @@ namespace shome.scene.processor
             };
             var factory = new StdSchedulerFactory(props);
             Quartz.IScheduler scheduler = await factory.GetScheduler();
-
+            scheduler.JobFactory = new DiJobFactory(serviceProvider);
             // and start it off
             await scheduler.Start();
 

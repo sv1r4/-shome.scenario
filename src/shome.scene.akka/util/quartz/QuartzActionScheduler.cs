@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Akka.Actor;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using shome.scene.akka.actors;
-using shome.scene.core.events;
 using IScheduler = Quartz.IScheduler;
 
 namespace shome.scene.akka.util.quartz
 {
     public class QuartzActionScheduler : ISceneActionScheduler
     {
-        private const string JobDataActor = "actor";
         private readonly IScheduler _quartzScheduler;
         private readonly ILogger _logger;
 
@@ -26,7 +23,7 @@ namespace shome.scene.akka.util.quartz
         {
             var jobData = new JobDataMap((IDictionary<string, object>)new Dictionary<string, object>
             {
-                {JobDataActor, sub.Subscriber}
+                {TellScheduleJob.JobDataActor, sub.Subscriber}
             });
 
             var jobName = sub.GetJobName();
@@ -54,19 +51,5 @@ namespace shome.scene.akka.util.quartz
             await _quartzScheduler.UnscheduleJob(new TriggerKey(triggerName));
         }
 
-        #region job
-
-        public class TellScheduleJob : IJob
-        {
-            public Task Execute(IJobExecutionContext context)
-            {
-                var actor = context.MergedJobDataMap.Get(JobDataActor) as IActorRef;
-                actor?.Tell(new ScheduleEvent());
-                return Task.CompletedTask;
-            }
-        }
-
-
-        #endregion
     }
 }
