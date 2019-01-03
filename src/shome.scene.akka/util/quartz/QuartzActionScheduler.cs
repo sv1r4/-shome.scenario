@@ -1,0 +1,72 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Akka.Actor;
+using Microsoft.Extensions.Logging;
+using Quartz;
+using shome.scene.akka.actors;
+using shome.scene.core.events;
+using IScheduler = Quartz.IScheduler;
+
+namespace shome.scene.akka.util.quartz
+{
+    public class QuartzActionScheduler : ISceneActionScheduler
+    {
+        private const string JobDataActor = "actor";
+        private readonly IScheduler _quartzScheduler;
+        private readonly ILogger _logger;
+
+        public QuartzActionScheduler(IScheduler quartzScheduler, ILogger<QuartzActionScheduler> logger)
+        {
+            _quartzScheduler = quartzScheduler;
+            _logger = logger;
+        }
+
+
+        public async Task ScheduleAction(PubSubProxyActor.SubToTime sub)
+        {
+            var jobData = new JobDataMap((IDictionary<string, object>)new Dictionary<string, object>
+            {
+                {JobDataActor, sub.Subscriber}
+            });
+
+            var jobName = sub.GetJobName();
+            var triggerName = sub.GetTriggerName();
+            var cron = sub.Cron;
+
+            var job = JobBuilder.Create<TellScheduleJob>()
+                .WithIdentity(jobName)
+                .SetJobData(jobData)
+                .Build();
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity(triggerName)
+                .WithCronSchedule(cron)
+                .Build();
+
+            _logger?.LogInformation($"Schedule job with trigger '{triggerName}'. \n{CronExpressionDescriptor.ExpressionDescriptor.GetDescription(sub.Cron)}");
+            await _quartzScheduler.ScheduleJob(job, trigger);
+        }
+
+        public async Task UnScheduleAction(PubSubProxyActor.SubBase sub)
+        {
+            var triggerName = sub.GetTriggerName();
+            _logger?.LogInformation($"UnSchedule job with trigger '{triggerName}'.");
+            await _quartzScheduler.UnscheduleJob(new TriggerKey(triggerName));
+        }
+
+        #region job
+
+        public class TellScheduleJob : IJob
+        {
+            public Task Execute(IJobExecutionContext context)
+            {
+                var actor = context.MergedJobDataMap.Get(JobDataActor) as IActorRef;
+                actor?.Tell(new ScheduleEvent());
+                return Task.CompletedTask;
+            }
+        }
+
+
+        #endregion
+    }
+}

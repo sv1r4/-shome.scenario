@@ -1,6 +1,6 @@
 ﻿using shome.scene.akka.actors;
 
-namespace shome.scene.akka.util
+namespace shome.scene.akka.util.quartz
 {
     public static class QuartzStringExtensions
     {

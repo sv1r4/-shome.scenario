@@ -17,6 +17,8 @@ using MQTTnet.Extensions.ManagedClient;
 using Quartz.Impl;
 using shome.scene.akka;
 using shome.scene.akka.actors;
+using shome.scene.akka.util;
+using shome.scene.akka.util.quartz;
 using shome.scene.core.contract;
 using shome.scene.core.events;
 using shome.scene.mqtt.core.config;
@@ -131,10 +133,10 @@ namespace shome.scene.processor
                     return _mqtt;
                 });
 
-                services.AddSingleton<Quartz.IScheduler>(sp =>
+                services.AddSingleton<ISceneActionScheduler>(sp =>
                 {
                     _quartzScheduler = InitQuartz().GetAwaiter().GetResult();
-                    return _quartzScheduler;
+                    return new QuartzActionScheduler(_quartzScheduler, sp.GetService<ILogger<QuartzActionScheduler>>());
                 });
 
                 services.AddSingleton<ActorSystem>(_actorSystem);
@@ -152,14 +154,13 @@ namespace shome.scene.processor
                         .WithScopedLifetime());
                 services.AddSingleton(new KnownPaths());
                 
-                var serviceProvider = services.BuildServiceProvider();
+                var serviceProvider = services.BuildServiceProvider(); 
                  
                 #endregion
 
                 InitActorSystemDI(_actorSystem, serviceProvider);
 
                 //initial read
-
                 _actorConfigReader = _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>());
                 _actorPubSub = _actorSystem.ActorOf(_actorSystem.DI().Props<PubSubProxyActor>());
                 _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());

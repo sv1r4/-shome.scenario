@@ -19,12 +19,12 @@ namespace shome.scene.akka.actors
         private readonly IMqttBasicClient _mqttClient;
         private readonly IList<SubBase> _subs;
         private readonly ILoggingAdapter _logger = Context.GetLogger();
-        private readonly IScheduler _quartzScheduler; 
+        private readonly ISceneActionScheduler _actionScheduler; 
 
-        public PubSubProxyActor(IMqttBasicClient mqttClient, IScheduler quartzScheduler)
+        public PubSubProxyActor(IMqttBasicClient mqttClient, ISceneActionScheduler actionScheduler)
         {
             _mqttClient = mqttClient;
-            _quartzScheduler = quartzScheduler;
+            _actionScheduler = actionScheduler;
             _subs = new List<SubBase>();
 
             InitManageSubscriptions();
@@ -49,7 +49,7 @@ namespace shome.scene.akka.actors
                     case TriggerTypeEnum.Action:
                         break;
                     case TriggerTypeEnum.Time:
-                        await ScheduleAction((SubToTime)e);
+                        await _actionScheduler.ScheduleAction((SubToTime)e);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -62,7 +62,7 @@ namespace shome.scene.akka.actors
                 foreach (var sub in subs)
                 {
                     _subs.Remove(sub);
-                    await UnscheduleAction(sub);
+                    await _actionScheduler.UnScheduleAction(sub);
                 }
 
                 _logger.Debug($"UnSub received. Subscribers count = {_subs.Count}");
@@ -163,50 +163,6 @@ namespace shome.scene.akka.actors
             {
             }
         }
-
-
-        #region Quartz util
-
-        private const string JobDataActor = "actor";
-
-        private async Task ScheduleAction(SubToTime sub)
-        {
-            var jobData = new JobDataMap((IDictionary<string, object>)new Dictionary<string, object>
-            {
-                {JobDataActor, sub.Subscriber}
-            });
-
-            var job = JobBuilder.Create<TellScheduleJob>()
-                .WithIdentity(sub.GetJobName())
-                .SetJobData(jobData)
-                .Build();
-
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity(sub.GetTriggerName())
-                .WithCronSchedule(sub.Cron)
-                .Build();
-
-            await _quartzScheduler.ScheduleJob(job, trigger);
-        }
-
-        private async Task UnscheduleAction(SubBase sub)
-        {
-            await _quartzScheduler.UnscheduleJob(new TriggerKey(sub.GetTriggerName()));
-        }
-
-        public class TellScheduleJob : IJob
-        {
-            public Task Execute(IJobExecutionContext context)
-            {
-                var actor = context.MergedJobDataMap.Get(JobDataActor) as IActorRef;
-                actor?.Tell(new ScheduleEvent());
-                return Task.CompletedTask;
-                //todo log scheduler
-            }
-        }
-
-        #endregion
-
 
     }
 
