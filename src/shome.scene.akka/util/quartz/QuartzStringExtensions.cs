@@ -6,12 +6,12 @@ namespace shome.scene.akka.util.quartz
     {
         public static string GetJobName(this PubSubProxyActor.SubBase sub)
         {
-            return $"job-{sub.Subscriber.Path}";
+            return $"job-{sub.Subscriber.Path.Name}";
         }
 
         public static string GetTriggerName(this PubSubProxyActor.SubBase sub)
         {
-            return $"trigger-{sub.Subscriber.Path}";
+            return $"trigger-{sub.Subscriber.Path.Name}";
         }
     }
 }
