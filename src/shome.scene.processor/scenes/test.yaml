@@ -17,7 +17,6 @@ actions:
   - action: testaction
     when: success
    
-
 - name: testaction
   if:
   - topic: bath/switch/e/state
@@ -26,7 +25,21 @@ actions:
   then:
   - topic: bath/switch/e/state
     message: done
+
+- name: test_schedule  
+  schedule: 0/5 * * * * ?
+  then:
+  - topic: test_schedule
+    message: done
     
+- name: test_schedule2
+  if:
+  - topic: test_schedule2
+    value: test
+  schedule: 0/7 * * * * ?
+  then:
+  - topic: test_schedule2
+    message: done
     
 - name: t2
   if:
