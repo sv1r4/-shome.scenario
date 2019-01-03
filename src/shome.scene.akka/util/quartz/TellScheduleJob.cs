@@ -24,7 +24,7 @@ namespace shome.scene.akka.util.quartz
                 throw new InvalidOperationException($"JobDataMap[{JobDataActor}] should not be empty");
             }
 
-            _logger.LogInformation($"tell '{nameof(ScheduleEvent)}' to {actor.Path}");
+            _logger.LogInformation($"tell '{nameof(ScheduleEvent)}' to {actor.Path.Name}");
             actor.Tell(new ScheduleEvent());
             return Task.CompletedTask;
         }

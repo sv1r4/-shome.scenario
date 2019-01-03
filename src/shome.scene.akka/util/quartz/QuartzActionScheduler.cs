@@ -40,7 +40,7 @@ namespace shome.scene.akka.util.quartz
                 .WithCronSchedule(cron)
                 .Build();
 
-            _logger?.LogInformation($"Schedule job with trigger '{triggerName}'. \n{CronExpressionDescriptor.ExpressionDescriptor.GetDescription(sub.Cron)}");
+            _logger?.LogInformation($"Schedule tell to '{sub.Subscriber.Path.Name}' {CronExpressionDescriptor.ExpressionDescriptor.GetDescription(sub.Cron)}");
             await _quartzScheduler.ScheduleJob(job, trigger);
         }
 
