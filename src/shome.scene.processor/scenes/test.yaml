@@ -26,6 +26,12 @@ actions:
   then:
   - topic: bath/switch/e/state
     message: done
+
+- name: test_schedule  
+  schedule: 0/5 * * * * ?
+  then:
+  - topic: test_schedule
+    message: done
     
     
 - name: t2

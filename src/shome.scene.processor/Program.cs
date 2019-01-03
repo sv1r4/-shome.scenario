@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using Quartz.Impl;
 using shome.scene.akka;
 using shome.scene.akka.actors;
 using shome.scene.core.contract;
@@ -31,10 +33,12 @@ namespace shome.scene.processor
     {
         private static ILogger _logger;
         private static IManagedMqttClient _mqtt;
+        private static Quartz.IScheduler _quartzScheduler;
         private static IFileProvider _fileProvider;
         private static ActorSystem _actorSystem;
         private static IActorRef _actorConfigReader;
         private static IActorRef _actorPubSub;
+
         private static KnownPaths _knownPaths;
 
         public static void Main()
@@ -68,6 +72,18 @@ namespace shome.scene.processor
             if (_mqtt != null)
             {
                 await _mqtt.StopAsync();
+            }
+
+            if (_quartzScheduler != null)
+            {
+                try
+                {
+                    await _quartzScheduler.Shutdown();
+                }
+                catch (SchedulerException)
+                {
+
+                }
             }
 
             _actorSystem?.Dispose();
@@ -115,6 +131,12 @@ namespace shome.scene.processor
                     return _mqtt;
                 });
 
+                services.AddSingleton<Quartz.IScheduler>(sp =>
+                {
+                    _quartzScheduler = InitQuartz().GetAwaiter().GetResult();
+                    return _quartzScheduler;
+                });
+
                 services.AddSingleton<ActorSystem>(_actorSystem);
                 services.AddSingleton<IFileProvider>(_fileProvider);
                 services.AddSingleton<Deserializer>(new DeserializerBuilder()
@@ -129,9 +151,9 @@ namespace shome.scene.processor
                         .AsSelf()
                         .WithScopedLifetime());
                 services.AddSingleton(new KnownPaths());
-
+                
                 var serviceProvider = services.BuildServiceProvider();
-
+                 
                 #endregion
 
                 InitActorSystemDI(_actorSystem, serviceProvider);
@@ -224,6 +246,25 @@ namespace shome.scene.processor
                 Topic = e.ApplicationMessage.Topic,
                 Message = strMessage
             });
+        }
+
+        #endregion
+
+        #region imfrastructure quartz
+
+        private static async Task<Quartz.IScheduler> InitQuartz()
+        {
+            var props = new NameValueCollection
+            {
+                { "quartz.serializer.type", "binary" }
+            };
+            var factory = new StdSchedulerFactory(props);
+            Quartz.IScheduler scheduler = await factory.GetScheduler();
+
+            // and start it off
+            await scheduler.Start();
+
+            return scheduler;
         }
 
         #endregion

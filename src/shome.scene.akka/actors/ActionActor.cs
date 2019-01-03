@@ -22,9 +22,6 @@ namespace shome.scene.akka.actors
             base.PreStart();
             foreach (var sceneIf in _sceneAction.If)
             {
-
-                // _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
-                //subscribe scene actor for messages
                 Context.System.ActorSelection(_knownPaths.PubSubActorPath)
                     .Tell(new SubscriptionBuilder()
                         .FromSceneIf(sceneIf)
@@ -33,11 +30,18 @@ namespace shome.scene.akka.actors
             }
             foreach (var dependency in _sceneAction.DependsOn)
             {
-                // _logger.LogDebug($"Tell Subscribe to topic='{topic}'");
-                //subscribe scene actor for messages
                 Context.System.ActorSelection(_knownPaths.PubSubActorPath)
                     .Tell(new SubscriptionBuilder()
                         .FromDependency(dependency)
+                        .WithActor(Self)
+                        .Build());
+            }
+
+            if (!string.IsNullOrWhiteSpace(_sceneAction.Schedule))
+            {
+                Context.System.ActorSelection(_knownPaths.PubSubActorPath)
+                    .Tell(new SubscriptionBuilder()
+                        .FromCron(_sceneAction.Schedule)
                         .WithActor(Self)
                         .Build());
             }
@@ -91,6 +95,7 @@ namespace shome.scene.akka.actors
 
         /// <summary>
         /// Waiting for 'if' triggers
+        /// or scheduler
         /// </summary>
         private void BecomePending()
         {
@@ -100,6 +105,11 @@ namespace shome.scene.akka.actors
                 Become(() =>
                 {
                     Receive<MqttMessageEvent>(e =>
+                    {
+                        _stateObj.Update(e);
+                        ProcessStateObj();
+                    });
+                    Receive<ScheduleEvent>(e =>
                     {
                         _stateObj.Update(e);
                         ProcessStateObj();

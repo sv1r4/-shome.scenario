@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Event;
+using Quartz;
+using shome.scene.akka.util;
 using shome.scene.core.events;
 using shome.scene.core.model;
 using shome.scene.core.util;
 using shome.scene.mqtt.core.contract;
+using IScheduler = Quartz.IScheduler;
 
 namespace shome.scene.akka.actors
 {
@@ -15,10 +19,12 @@ namespace shome.scene.akka.actors
         private readonly IMqttBasicClient _mqttClient;
         private readonly IList<SubBase> _subs;
         private readonly ILoggingAdapter _logger = Context.GetLogger();
+        private readonly IScheduler _quartzScheduler; 
 
-        public PubSubProxyActor(IMqttBasicClient mqttClient)
+        public PubSubProxyActor(IMqttBasicClient mqttClient, IScheduler quartzScheduler)
         {
             _mqttClient = mqttClient;
+            _quartzScheduler = quartzScheduler;
             _subs = new List<SubBase>();
 
             InitManageSubscriptions();
@@ -42,29 +48,34 @@ namespace shome.scene.akka.actors
                         break;
                     case TriggerTypeEnum.Action:
                         break;
+                    case TriggerTypeEnum.Time:
+                        await ScheduleAction((SubToTime)e);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
                 _logger.Debug($"Sub received. Type='{e.Type.ToString()}'. Subscribers count = {_subs.Count}");
             });
-            Receive<UnSub>(e =>
+            ReceiveAsync<UnSub>(async e =>
             {
                 var subs = _subs.Where(x => x.Subscriber.Equals(e.Actor)).ToList();
                 foreach (var sub in subs)
                 {
                     _subs.Remove(sub);
+                    await UnscheduleAction(sub);
                 }
 
                 _logger.Debug($"UnSub received. Subscribers count = {_subs.Count}");
             });
         }
 
+
         private void InitPassMessagesToSubscribers()
         {
             Receive<MqttMessageEvent>(mqttEvent =>
             {
                 var i = 0;
-                //todo resolve double match topic checking inside actor and hear
+                //todo resolve double match topic checking inside actor and here
                 foreach (var sub in _subs
                     .Where(x => x.Type == TriggerTypeEnum.Mqtt
                                 && x is SubToMqtt mx
@@ -75,12 +86,12 @@ namespace shome.scene.akka.actors
                     sub.Subscriber.Tell(mqttEvent);
                 }
 
-                _logger.Debug($"MqttMessage delivered to {i} actors");
+                _logger.Debug($"{nameof(MqttMessageEvent)} delivered to {i} actors");
             });
             Receive<ActionResultEvent>(actionEvent =>
             {
                 var i = 0;
-                //todo resolve double match action checking inside actor and hear
+                //todo resolve double match action checking inside actor and here
                 foreach (var sub in _subs
                     .Where(x => x.Type == TriggerTypeEnum.Action
                                 && x is SubToAction ma
@@ -90,8 +101,9 @@ namespace shome.scene.akka.actors
                     sub.Subscriber.Tell(actionEvent);
                 }
 
-                _logger.Debug($"ActionMessage delivered to {i} actors");
+                _logger.Debug($"{nameof(ActionResultEvent)} delivered to {i} actors");
             });
+            
         }
 
         private void InitProxyToMqttBroker()
@@ -134,6 +146,15 @@ namespace shome.scene.akka.actors
             }
         }
 
+        public class SubToTime : SubBase
+        {
+            public string Cron { get; set; }
+
+            public SubToTime() : base(TriggerTypeEnum.Time)
+            {
+            }
+        }
+
         public class SubToAction : SubBase
         {
             public string ActionName { get; set; }
@@ -144,7 +165,49 @@ namespace shome.scene.akka.actors
         }
 
 
-       
+        #region Quartz util
+
+        private const string JobDataActor = "actor";
+
+        private async Task ScheduleAction(SubToTime sub)
+        {
+            var jobData = new JobDataMap((IDictionary<string, object>)new Dictionary<string, object>
+            {
+                {JobDataActor, sub.Subscriber}
+            });
+
+            var job = JobBuilder.Create<TellScheduleJob>()
+                .WithIdentity(sub.GetJobName())
+                .SetJobData(jobData)
+                .Build();
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity(sub.GetTriggerName())
+                .WithCronSchedule(sub.Cron)
+                .Build();
+
+            await _quartzScheduler.ScheduleJob(job, trigger);
+        }
+
+        private async Task UnscheduleAction(SubBase sub)
+        {
+            await _quartzScheduler.UnscheduleJob(new TriggerKey(sub.GetTriggerName()));
+        }
+
+        public class TellScheduleJob : IJob
+        {
+            public Task Execute(IJobExecutionContext context)
+            {
+                var actor = context.MergedJobDataMap.Get(JobDataActor) as IActorRef;
+                actor?.Tell(new ScheduleEvent());
+                return Task.CompletedTask;
+                //todo log scheduler
+            }
+        }
+
+        #endregion
+
+
     }
 
     
