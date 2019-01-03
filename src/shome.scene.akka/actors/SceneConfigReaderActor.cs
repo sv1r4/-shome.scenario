@@ -17,7 +17,7 @@ namespace shome.scene.akka.actors
 
         public SceneConfigReaderActor(ISceneProvider sceneProvider)
         {
-            Receive<GetScenesConfig>(m =>
+            Receive<ReadScenes>(m =>
             {
                 var newConfigs = sceneProvider.GetConfigs().ToList();
                 var removedConfigs = _configs.Where(x => newConfigs.All(nx => !x.Name.Equals(nx.Name))).ToList();
@@ -43,7 +43,7 @@ namespace shome.scene.akka.actors
             _creatorActor = Context.ActorOf(props);
         }
 
-        public class GetScenesConfig
+        public class ReadScenes
         {
         }
     }

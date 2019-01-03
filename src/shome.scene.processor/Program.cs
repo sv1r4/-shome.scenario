@@ -177,10 +177,10 @@ namespace shome.scene.processor
 
                 InitActorSystemDI(_actorSystem, serviceProvider);
 
-                //initial read
                 _actorConfigReader = _actorSystem.ActorOf(_actorSystem.DI().Props<SceneConfigReaderActor>());
                 _actorPubSub = _actorSystem.ActorOf(_actorSystem.DI().Props<PubSubProxyActor>());
-                _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
+                //initial read
+                _actorConfigReader.Tell(new SceneConfigReaderActor.ReadScenes());
                 _knownPaths = serviceProvider.GetRequiredService<KnownPaths>();
                 _knownPaths.PubSubActorPath = _actorPubSub.Path;
 
@@ -275,9 +275,8 @@ namespace shome.scene.processor
                 { "quartz.serializer.type", "binary" }
             };
             var factory = new StdSchedulerFactory(props);
-            Quartz.IScheduler scheduler = await factory.GetScheduler();
+            var scheduler = await factory.GetScheduler();
             scheduler.JobFactory = new DiJobFactory(serviceProvider);
-            // and start it off
             await scheduler.Start();
 
             return scheduler;
@@ -306,7 +305,7 @@ namespace shome.scene.processor
                 }, tcs);
                 await tcs.Task.ConfigureAwait(false);
 
-                _actorConfigReader.Tell(new SceneConfigReaderActor.GetScenesConfig());
+                _actorConfigReader.Tell(new SceneConfigReaderActor.ReadScenes());
                 _logger.LogDebug("changed");
             }
             // ReSharper disable once FunctionNeverReturns - expected infinit task
