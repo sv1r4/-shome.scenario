@@ -8,36 +8,43 @@ namespace shome.scene.core
 {
     public class ActionStateObj
     {
-        private readonly IDictionary<SceneConfig.SceneDependency, DepStatus> _depState;
+        private readonly IDictionary<SceneConfig.SceneDependency, DepStatus> _dependencyState;
         public IReadOnlyList<(SceneConfig.SceneIf SceneIf, IfStatus Status)> TriggersState { get; }
-       
+        private bool _scheduleOk;
+
         public ActionStateObj(SceneConfig.SceneAction sceneAction)
         {
-            _depState = sceneAction.DependsOn.ToDictionary(x => x, _ => new DepStatus());
-            TriggersState = sceneAction.If.Select(x => (x, new IfStatus())).ToList();            
+            _dependencyState = sceneAction.DependsOn.ToDictionary(x => x, _ => new DepStatus());
+            TriggersState = sceneAction.If.Select(x => (x, new IfStatus())).ToList();
+            _scheduleOk = string.IsNullOrWhiteSpace(sceneAction.Schedule);
         }
 
         public ActionStateEnum State()
         {
             //check dependencies
-            if (!_depState.All(x => x.Value.IsRaised)) return ActionStateEnum.Idle;
+            if (!_dependencyState.All(x => x.Value.IsRaised)) return ActionStateEnum.Idle;
 
-            //check triggers
-            return TriggersState.All(x => x.Status.IsRaised)
+            //check triggers and schedule
+            return TriggersState.All(x => x.Status.IsRaised) && _scheduleOk //todo refactor _scheduleOk
                 ? ActionStateEnum.Active
                 : ActionStateEnum.Pending;
         }
 
         public void Update(ActionResultEvent e)
         {
-            foreach (var dep in _depState.Where(x => x.Key.IsMatch(e)).ToList())
+            foreach (var dep in _dependencyState.Where(x => x.Key.IsMatch(e)).ToList())
             {
-                _depState[dep.Key] = new DepStatus
+                _dependencyState[dep.Key] = new DepStatus
                 {
                     IsRaised = true
                 }; 
             }
-        } 
+        }
+
+        public void Update(ScheduleEvent e)
+        {
+            _scheduleOk = true;
+        }
 
         public void Update(MqttMessageEvent e)
         {

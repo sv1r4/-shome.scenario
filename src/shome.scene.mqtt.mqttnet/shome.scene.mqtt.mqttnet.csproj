@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="2.8.4" />
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="2.8.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\shome.scene.mqtt.core\shome.scene.mqtt.core.csproj" />

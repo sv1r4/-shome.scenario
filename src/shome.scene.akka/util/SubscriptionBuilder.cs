@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using shome.scene.akka.actors;
 using shome.scene.core.model;
 
@@ -14,12 +15,38 @@ namespace shome.scene.akka.util
             _actor = actor;
             return this;
         }
+
         public SubscriptionBuilder FromSceneIf(SceneConfig.SceneIf sceneIf)
         {
+            #region validate input
 
+            if (sceneIf == null) { throw new ArgumentNullException(nameof(sceneIf));}
+
+            if (string.IsNullOrWhiteSpace(sceneIf.Topic))
+            {
+                throw new ArgumentException($"{nameof(sceneIf.Topic)} should not be both empty", nameof(sceneIf));
+            }
+
+            #endregion
+
+            return FromTopic(sceneIf.Topic);
+        }
+
+        private SubscriptionBuilder FromTopic(string topic)
+        {
             _subscription = new PubSubProxyActor.SubToMqtt
             {
-                Topic = sceneIf.Topic
+                Topic = topic
+            };
+
+            return this;
+        }
+
+        public SubscriptionBuilder FromCron(string cronString)
+        {
+            _subscription = new PubSubProxyActor.SubToTime
+            {
+                Cron = cronString
             };
 
             return this;
