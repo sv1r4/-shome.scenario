@@ -4,17 +4,18 @@ services:
   shome-scene-processor:
     image: "${IMAGE_PREFIX}shome.scene.processor:${TAG}"
     environment:
-      MqttConfig__Host: "192.168.1.1"
-      MqttConfig__Port: 1883
-      MqttConfig__User: ""
-      MqttConfig__Password: ""
-      Logging__LogLevel__Default: "Warning"
-      Logging__LogLevel__Akka: "Information"
+      MqttConfig__Host: "${MqttConfig__Host}"
+      MqttConfig__Port: "${MqttConfig__Port}"
+      MqttConfig__User: "${MqttConfig__User]"
+      MqttConfig__Password: "${MqttConfig__Password}"
+      Logging__LogLevel__Default: "${Logging__LogLevel__Default}"
+      Logging__LogLevel__Akka: "${Logging__LogLevel__Akka}"
+      SceneYamlConfig__Directory: "scenes"
+  },
     volumes:
-      - "/home/docker/shome.scene/scenes:/app/scenes"
+      - "${HostScenesDir}:/app/scenes"
     deploy:
       replicas: 1
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
