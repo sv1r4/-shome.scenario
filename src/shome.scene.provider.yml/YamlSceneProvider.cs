@@ -16,7 +16,7 @@ namespace shome.scene.provider.yml
         public YamlSceneProvider(IFileProvider fileProvider, Deserializer deserializer)
         {
             _fileProvider = fileProvider;
-            this._deserializer = deserializer;
+            _deserializer = deserializer;
         }
 
         public IEnumerable<SceneConfig> GetConfigs()
