@@ -1,12 +1,3 @@
+[![pipeline status](https://gitlab.com/sv1r4/shome.scenario/badges/master/pipeline.svg)](https://gitlab.com/sv1r4/shome.scenario/commits/master)
 
-### view services
-
-``` shell
-docker stack services shome-apps
-```
-
-### view logs
-
-``` shell
-docker service logs shome-apps_shome-scene-processor -f
-```
+TODO
