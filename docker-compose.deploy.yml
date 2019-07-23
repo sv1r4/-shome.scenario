@@ -6,7 +6,7 @@ services:
     environment:
       MqttConfig__Host: "${MqttConfig__Host}"
       MqttConfig__Port: "${MqttConfig__Port}"
-      MqttConfig__User: "${MqttConfig__User]"
+      MqttConfig__User: "${MqttConfig__User}"
       MqttConfig__Password: "${MqttConfig__Password}"
       Logging__LogLevel__Default: "${Logging__LogLevel__Default}"
       Logging__LogLevel__Akka: "${Logging__LogLevel__Akka}"
