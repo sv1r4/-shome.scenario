@@ -10,12 +10,14 @@ namespace shome.scene.core
     {
         private readonly IDictionary<SceneConfig.SceneDependency, DepStatus> _dependencyState;
         public IReadOnlyList<(SceneConfig.SceneIf SceneIf, IfStatus Status)> TriggersState { get; }
+        public IReadOnlyList<(SceneConfig.SceneThen SceneThen, ThenStatus Status)> ThensState { get; }
         private bool _scheduleOk;
 
         public ActionStateObj(SceneConfig.SceneAction sceneAction)
         {
             _dependencyState = sceneAction.DependsOn.ToDictionary(x => x, _ => new DepStatus());
-            TriggersState = sceneAction.If.Select(x => (x, new IfStatus())).ToList();
+            TriggersState = sceneAction.If.Select(x => (x, new IfStatus())).ToList().AsReadOnly();
+            ThensState = sceneAction.Then.Select(x => (x, new ThenStatus())).ToList().AsReadOnly();
             _scheduleOk = string.IsNullOrWhiteSpace(sceneAction.Schedule);
         }
 
@@ -25,9 +27,21 @@ namespace shome.scene.core
             if (!_dependencyState.All(x => x.Value.IsRaised)) return ActionStateEnum.Idle;
 
             //check triggers and schedule
-            return TriggersState.All(x => x.Status.IsRaised) && _scheduleOk //todo refactor _scheduleOk
-                ? ActionStateEnum.Active
-                : ActionStateEnum.Pending;
+            var isAllTriggersRaised =  TriggersState.All(x => x.Status.IsRaised) && _scheduleOk; //todo refactor _scheduleOk
+            if (!isAllTriggersRaised)
+            {
+                //not all triggers raised - wait for triggers
+                return ActionStateEnum.Pending;
+            }
+            var isAllThenDone = ThensState.All(x=>x.Status.IsDone);
+            //if all 'then' done return 'Done' status if not wait for all then to be executed
+            if (isAllThenDone)
+            {
+                return ActionStateEnum.Done;
+            }else
+            {
+                return ActionStateEnum.Active;
+            }
         }
 
         public void Update(ActionResultEvent e)
@@ -44,6 +58,14 @@ namespace shome.scene.core
         public void Update(ScheduleEvent e)
         {
             _scheduleOk = true;
+        }
+
+        public void Update(ThenDoneEvent e)
+        {
+            foreach (var thenState in ThensState.Where(x => x.SceneThen.Equals(e.Then)))
+            {
+                thenState.Status.IsDone = true;
+            }
         }
 
         public void Update(MqttMessageEvent e)

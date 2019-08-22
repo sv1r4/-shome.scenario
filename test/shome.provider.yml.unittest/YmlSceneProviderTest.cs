@@ -1,3 +1,4 @@
+using System;
 using shome.scene.core.model;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,7 +40,8 @@ namespace shome.provider.yml.unittest
                             new SceneConfig.SceneThen
                             {
                                 Topic = "bath/light/0/c/state",
-                                Message = "1"
+                                Message = "1",
+                                Delay = TimeSpan.FromHours(1)
                             },
                             new SceneConfig.SceneThen
                             {
@@ -172,6 +174,7 @@ actions:
     message: '{""Mode"":0,""R"":0,""G"":0,""B"":0}'
   - topic: /lr/light/switch/c/main
     message: 0
+    delay: 01:00:00
     
 - name: lr_switch_hold
   if:

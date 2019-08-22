@@ -61,7 +61,7 @@ namespace shome.scene.akka.actors
             return Akka.Actor.Props.Create(() => new ActionActor(sceneAction, knownPaths));
         }
 
-        #region Behaviours
+        #region behaviours
 
         private void BecomeState(ActionStateEnum stateEnum, Action action)
         {
@@ -119,6 +119,50 @@ namespace shome.scene.akka.actors
             });
         }
 
+
+        /// <summary>
+        /// Waiting for 'then' done
+        /// or scheduler
+        /// </summary>
+        private void BecomeActive()
+        {
+            BecomeState(ActionStateEnum.Active, () =>
+            {
+                _logger.Debug($"Action {_sceneAction.Name} become Active. Waiting for 'then' done");
+                Become(() =>
+                {
+                    Receive<DoThen>(e =>
+                    {
+                        PubSubPub(new PubSubProxyActor.MqttDoPublish
+                        {
+                            Topic = e.Then.Topic,
+                            Message = new ThenMessageBuilder()
+                                .WithRawMessage(e.Then.Message)
+                                .WithTriggersState(_stateObj.TriggersState)
+                                .Build()
+                        });
+
+                        _stateObj.Update(new ThenDoneEvent(e.Then));
+                        ProcessStateObj();
+                    });
+                });
+                ProcessStateObj();
+            });
+        }
+        #endregion
+
+        #region messages
+
+        public class DoThen
+        {
+            public SceneConfig.SceneThen Then { get; }
+
+            public DoThen(SceneConfig.SceneThen then)
+            {
+                Then = then;
+            }
+        }
+
         #endregion
 
         private void ProcessStateObj()
@@ -131,19 +175,24 @@ namespace shome.scene.akka.actors
             if (state == ActionStateEnum.Active)
             {
                 _logger.Info($"Action '{_sceneAction.Name}' activated");
-                //perform 'then'
+                BecomeActive();
+
+                //queue/schedule 'then's
                 foreach (var mqttAction in _sceneAction.Then)
                 {
-                    _logger.Debug($"Action '{_sceneAction.Name}' Perform 'then' action publish to  {mqttAction.Topic}");
-                    PubSubPub(new PubSubProxyActor.MqttDoPublish
+                    _logger.Debug($"Action '{_sceneAction.Name}' Perform 'then' action publish to  {mqttAction.Topic} {(mqttAction.Delay==null?string.Empty:$"with delay {mqttAction.Delay}")}");
+                    if (mqttAction.Delay == null)
                     {
-                        Topic = mqttAction.Topic,
-                        Message = new ThenMessageBuilder()
-                            .WithRawMessage(mqttAction.Message)
-                            .WithTriggersState(_stateObj.TriggersState)
-                            .Build()
-                    });
+                        Self.Tell(new DoThen(mqttAction));
+                    }
+                    else
+                    {
+                        Context.System.Scheduler.ScheduleTellOnce(mqttAction.Delay.Value, Self, new DoThen(mqttAction),Self);
+                    }
                 }
+            }
+            else if (state == ActionStateEnum.Done)
+            {
                 //notify done
                 PubSubPub(new ActionResultEvent
                 {

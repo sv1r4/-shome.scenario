@@ -36,6 +36,20 @@ namespace shome.scene.core.model
         {
             public string Topic { get; set; }
             public string Message { get; set; }
+            public TimeSpan? Delay { get; set; }
+
+            public bool Equals(SceneThen other)
+            {
+                if (other == null)
+                {
+                    return false;
+                }
+
+                return this.Delay == other.Delay
+                       && string.Equals(this.Message, other.Message, StringComparison.Ordinal)
+                       && string.Equals(this.Topic, other.Topic, StringComparison.OrdinalIgnoreCase);
+            }
+
         }
     }
 
