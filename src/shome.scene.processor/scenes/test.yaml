@@ -26,11 +26,7 @@ actions:
   - topic: bath/switch/e/state
     message: done
 
-- name: test_schedule  
-  schedule: 0/5 * * * * ?
-  then:
-  - topic: test_schedule
-    message: done
+
     
 - name: test_schedule2
   if:
@@ -64,3 +60,14 @@ actions:
   then:
   - topic: t4/result
     message: mathes
+
+- name: test_delay
+  if:
+  - topic: test_delay
+    value: test
+  then:
+  - topic: test_delay
+    message: nodelay
+  - topic: test_delay
+    message: test_delay_10s
+    delay: 00:00:10

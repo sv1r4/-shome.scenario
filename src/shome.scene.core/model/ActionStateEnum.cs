@@ -13,8 +13,12 @@
         /// </summary>
         Pending,
         /// <summary>
-        /// Triggers complete
+        /// Triggers complete, then to be executed
         /// </summary>
-        Active
+        Active,
+        /// <summary>
+        /// all Then executed
+        /// </summary>
+        Done
     }
 }
