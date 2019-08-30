@@ -15,6 +15,7 @@ namespace shome.scene.core.model
             public IEnumerable<SceneThen> Then { get; set; } = Array.Empty<SceneThen>();
             public IEnumerable<SceneDependency> DependsOn { get; set; } = Array.Empty<SceneDependency>();
             public string Schedule { get; set; }
+            public TimeSpan? Timeout { get; set; }
         }
 
         public class SceneIf

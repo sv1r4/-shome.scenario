@@ -80,6 +80,7 @@ namespace shome.scene.akka.actors
             BecomeState(ActionStateEnum.Idle, () =>
             {
                 _logger.Debug($"Action {_sceneAction.Name} become Idle");
+                //reset stateObject
                 _stateObj = new ActionStateObj(_sceneAction);
                 Become(() =>
                 {
@@ -114,7 +115,19 @@ namespace shome.scene.akka.actors
                         _stateObj.Update(e);
                         ProcessStateObj();
                     });
+                    Receive<TimedOut>(e =>
+                    {
+                        _logger.Log(LogLevel.InfoLevel, "Receive timed out message. Become idle");
+                        //notify fail
+                        PubSubPub(new ActionResultEvent
+                        {
+                            ActionName = _sceneAction.Name,
+                            Result = ActionResultEnum.Fail
+                        });
+                        BecomeIdle();
+                    });
                 });
+               
                 ProcessStateObj();
             });
         }
@@ -163,6 +176,11 @@ namespace shome.scene.akka.actors
             }
         }
 
+        public class TimedOut
+        {
+
+        }
+
         #endregion
 
         private void ProcessStateObj()
@@ -204,7 +222,11 @@ namespace shome.scene.akka.actors
             }
             else if (state == ActionStateEnum.Pending)
             {
-                //todo set timeout
+                if (_sceneAction.Timeout != null)
+                {
+                    _logger.Log(LogLevel.InfoLevel, $"Set SceneAction timeout '{_sceneAction.Timeout}'");
+                    Context.System.Scheduler.ScheduleTellOnce(_sceneAction.Timeout.Value, Self, new TimedOut(), Self);
+                }
                 BecomePending();
             }
         }
