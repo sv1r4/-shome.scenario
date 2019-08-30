@@ -71,3 +71,14 @@ actions:
   - topic: test_delay
     message: test_delay_10s
     delay: 00:00:10
+
+- name: test_timeout
+  if:
+  - topic: test_timeout1
+    value: test
+  - topic: test_timeout2
+    value: test
+  then:
+  - topic: test_timeout3
+    message: done
+  timeout: "00:00:10"
