@@ -4,6 +4,7 @@
     {
         public bool IsRaised { get; set; }
         public string EventValue { get; set; }
+        public string RawMessage { get; set; }
     }
 
 }

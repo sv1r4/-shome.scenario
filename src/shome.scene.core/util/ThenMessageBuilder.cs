@@ -19,26 +19,40 @@ namespace shome.scene.core.util
             }
             #endregion
             #region process specials - proxy from 'if'
-
-            if (_rawMessage.StartsWith(Specials.Proxy))
-            {
-                //if proxy index specified in message i.e. '@proxy0' '@proxy 1', '@proxy 2'
-                //get message from corresponding 'if' otherwise from first one
-                if (!int.TryParse(_rawMessage.Remove(0, Specials.Proxy.Length).Trim(), out var proxyIndex))
-                {
-                    proxyIndex = 0;
-                }
-                //check interval
-                if (proxyIndex >= 0 && proxyIndex < _triggersState.Count)
-                {
-                    return _triggersState[proxyIndex].Status.EventValue;
-                }
-                throw new IndexOutOfRangeException($"Specified index={proxyIndex} ('{_rawMessage}') is out of range 'If' collection size [{0}..{_triggersState.Count - 1}]");
-
-            }
+            if (TryGetProxiedMessage(Specials.ProxyRaw,s=>s.RawMessage, out var rawMessage)) return rawMessage;
+            if (TryGetProxiedMessage(Specials.Proxy,s=>s.EventValue, out rawMessage)) return rawMessage;
             #endregion
             throw new InvalidOperationException($"Unsupported @special message '{_rawMessage}'");
 
+        }
+
+        private bool TryGetProxiedMessage(string prefix,Func<IfStatus, string> getMessageFunc, out string rawMessage)
+        {
+            if (_rawMessage.StartsWith(prefix))
+            {
+                //if proxy index specified in message i.e. '@proxy0' '@proxy 1', '@proxy 2'
+                //or for raw message proxy i.e. '@proxy_raw0' '@proxy_raw 1', '@proxy_raw 2'
+                //get message from corresponding 'if' otherwise from first one
+                if (!int.TryParse(_rawMessage.Remove(0, prefix.Length).Trim(), out var proxyIndex))
+                {
+                    proxyIndex = 0;
+                }
+
+                //check interval
+                if (proxyIndex >= 0 && proxyIndex < _triggersState.Count)
+                {
+                    {
+                        rawMessage = getMessageFunc(_triggersState[proxyIndex].Status);
+                        return true;
+                    }
+                }
+
+                throw new IndexOutOfRangeException(
+                    $"Specified index={proxyIndex} ('{_rawMessage}') is out of range 'If' collection size [{0}..{_triggersState.Count - 1}]");
+            }
+
+            rawMessage = _rawMessage;
+            return false;
         }
 
         public ThenMessageBuilder WithRawMessage(string rawMessage)
