@@ -76,6 +76,7 @@ namespace shome.scene.core
                 {
                     trigger.Status.IsRaised = true;
                     trigger.Status.EventValue = eventValue;
+                    trigger.Status.RawMessage = e.Message;
                 }
             }
         }

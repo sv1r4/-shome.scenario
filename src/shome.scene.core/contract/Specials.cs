@@ -9,6 +9,7 @@
         public static readonly string LessEqual = $"{Key}<=";
 
         public static readonly string Proxy = $"{Key}proxy";
+        public static readonly string ProxyRaw = $"{Key}proxy_raw";
         public static readonly string Match = $"{Key}match";
     }
 }
