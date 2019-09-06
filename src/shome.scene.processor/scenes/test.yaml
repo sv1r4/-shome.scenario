@@ -82,3 +82,22 @@ actions:
   - topic: test_timeout3
     message: done
   timeout: "00:00:10"
+
+- name: pre_test_timeout
+  if:
+  - topic: pre_test_timeout
+    value: test
+
+- name: test_timeout_dependent
+  if:
+  - topic: test_timeout1
+    value: test
+  - topic: test_timeout2
+    value: test
+  then:
+  - topic: test_timeout3
+    message: done
+  timeout: "00:00:10"
+  dependsOn:
+  - action: pre_test_timeout
+    when: success
