@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Akka.Actor;
 using Akka.Event;
 using shome.scene.akka.util;
@@ -16,6 +17,7 @@ namespace shome.scene.akka.actors
         private readonly SceneConfig.SceneAction _sceneAction;
         private ActionStateObj _stateObj;
         private ActionStateEnum _currentState = ActionStateEnum.Undefined;
+        private bool _isTimerSet;
 
         protected override void PreStart()
         {
@@ -82,6 +84,7 @@ namespace shome.scene.akka.actors
                 _logger.Debug($"Action {_sceneAction.Name} become Idle");
                 //reset stateObject
                 _stateObj = new ActionStateObj(_sceneAction);
+                ResetTimeoutFlag();
                 Become(() =>
                 {
                     Receive<ActionResultEvent>(e =>
@@ -109,11 +112,13 @@ namespace shome.scene.akka.actors
                     {
                         _stateObj.Update(e);
                         ProcessStateObj();
+                        ScheduleTimeoutIfNotExists();
                     });
                     Receive<ScheduleEvent>(e =>
                     {
                         _stateObj.Update(e);
                         ProcessStateObj();
+                        ScheduleTimeoutIfNotExists();
                     });
                     Receive<TimedOut>(e =>
                     {
@@ -222,13 +227,40 @@ namespace shome.scene.akka.actors
             }
             else if (state == ActionStateEnum.Pending)
             {
-                if (_sceneAction.Timeout != null)
+                //if dependency exists then start timeout now
+                //if no - start timeout after first 'if'
+                if (_sceneAction.DependsOn?.Any() == true)
                 {
-                    _logger.Log(LogLevel.InfoLevel, $"Set SceneAction timeout '{_sceneAction.Timeout}'");
-                    Context.System.Scheduler.ScheduleTellOnce(_sceneAction.Timeout.Value, Self, new TimedOut(), Self);
+                    _logger.Log(LogLevel.DebugLevel, $"Dependencies done - schedule timeout");
+                    ScheduleTimeoutIfNotExists();
                 }
                 BecomePending();
             }
+        }
+
+        private void ScheduleTimeoutIfNotExists()
+        {
+
+            if (_sceneAction.Timeout == null)
+            {
+                _logger.Debug("Timeout for action not set");
+                return;
+            }
+            if (_isTimerSet)
+            {
+                _logger.Debug("Timeout for action already set");
+                return;
+            }
+
+            _logger.Log(LogLevel.InfoLevel, $"Set SceneAction timeout '{_sceneAction.Timeout}'");
+            _isTimerSet = true;
+            Context.System.Scheduler.ScheduleTellOnce(_sceneAction.Timeout.Value, Self, new TimedOut(), Self);
+            
+        }
+
+        private void ResetTimeoutFlag()
+        {
+            _isTimerSet = false;
         }
 
         private void PubSubPub(object message)
