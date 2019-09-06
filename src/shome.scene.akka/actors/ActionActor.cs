@@ -231,7 +231,7 @@ namespace shome.scene.akka.actors
                 //if no - start timeout after first 'if'
                 if (_sceneAction.DependsOn?.Any() == true)
                 {
-                    _logger.Log(LogLevel.DebugLevel, $"Dependencies done - schedule timeout");
+                    _logger.Log(LogLevel.DebugLevel, $"Dependencies done - schedule timeout if exists");
                     ScheduleTimeoutIfNotExists();
                 }
                 BecomePending();
@@ -243,7 +243,7 @@ namespace shome.scene.akka.actors
 
             if (_sceneAction.Timeout == null)
             {
-                _logger.Debug("Timeout for action not set");
+                _logger.Debug("Timeout for action not exists");
                 return;
             }
             if (_isTimerSet)
