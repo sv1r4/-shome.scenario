@@ -23,13 +23,16 @@ namespace shome.scene.mqtt.mqttnet
 
         private static MqttApplicationMessage CreateApplicationMessage(string topic, string message, bool retain=false,int qos =0 )
         {
-            return new MqttApplicationMessage
+            var mb = new MqttApplicationMessageBuilder()
+                .WithQualityOfServiceLevel((MqttQualityOfServiceLevel)qos)
+                .WithTopic(topic)
+                .WithRetainFlag(retain);
+            if (!string.IsNullOrWhiteSpace(message))
             {
-                Payload = Encoding.UTF8.GetBytes(message),
-                Topic = topic,
-                Retain = retain,
-                QualityOfServiceLevel = (MqttQualityOfServiceLevel)qos
-            };
+                mb.WithPayload(Encoding.UTF8.GetBytes(message));
+            }
+
+            return mb.Build();
         }
 
         public Task Publish(string topic, string message, bool retained)
