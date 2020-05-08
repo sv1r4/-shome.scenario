@@ -184,7 +184,9 @@ actions:
   - topic: lr/light/c/led
     message: '{""Mode"":0,""R"":0,""G"":0,""B"":0}'
   - topic: /lr/light/switch/c/main
-    message: 0")]
+    message: 0
+    retained: true
+")]
         [Theory]
         public void YamlDeserialization(string yaml)
         {

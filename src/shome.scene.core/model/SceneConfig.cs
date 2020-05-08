@@ -37,6 +37,7 @@ namespace shome.scene.core.model
         {
             public string Topic { get; set; }
             public string Message { get; set; }
+            public bool Retained { get; set; }
             public TimeSpan? Delay { get; set; }
 
             public bool Equals(SceneThen other)

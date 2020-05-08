@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Event;
-using Quartz;
 using shome.scene.akka.util;
 using shome.scene.core.events;
 using shome.scene.core.model;
 using shome.scene.core.util;
 using shome.scene.mqtt.core.contract;
-using IScheduler = Quartz.IScheduler;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace shome.scene.akka.actors
 {

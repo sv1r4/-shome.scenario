@@ -154,6 +154,7 @@ namespace shome.scene.akka.actors
                         PubSubPub(new PubSubProxyActor.MqttDoPublish
                         {
                             Topic = e.Then.Topic,
+                            Retained = e.Then.Retained,
                             Message = new ThenMessageBuilder()
                                 .WithRawMessage(e.Then.Message)
                                 .WithTriggersState(_stateObj.TriggersState)
