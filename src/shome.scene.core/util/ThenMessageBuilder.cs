@@ -12,6 +12,12 @@ namespace shome.scene.core.util
         
         public string Build()
         {
+            #region emty messagecheck
+            if (string.IsNullOrWhiteSpace(_rawMessage))
+            {
+                return string.Empty;
+            }
+            #endregion
             #region regular return what defined in message
             if (!_rawMessage.StartsWith(Specials.Key))
             {
