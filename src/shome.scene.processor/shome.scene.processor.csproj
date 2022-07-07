@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6" />
     <ProjectReference Include="..\shome.scene.akka\shome.scene.akka.csproj" />
     <ProjectReference Include="..\shome.scene.mqtt.mqttnet\shome.scene.mqtt.mqttnet.csproj" />
     <ProjectReference Include="..\shome.scene.provider.yml\shome.scene.provider.yml.csproj" />
